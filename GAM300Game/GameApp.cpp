@@ -1,63 +1,48 @@
-// Application.cpp
+// GamApp.cpp
 #include <shlwapi.h>                // GetModuleFileNameA(), PathRemoveFileSpecA()
 #pragma comment(lib, "shlwapi.lib") // Needed for <shlwapi.h>
 #include <vector>
 #include <array>
 #include <sstream>
-#include <imgui/imgui.h>
 
-#include "EditorApp.h"
-
+#include "GameApp.h"
 #include "Logger/Logger.h"
 #include "Input/Input.h"
 #include "vulkanTools/Model.h"
-#include "imguiHelper/ImguiHelper.h"
+
 #include "vulkanTools/FrameInfo.h"
 #include "Timestep/Timestep.h"
 #include "sceneManager/sceneManager.h"
-#include "Tools/ShaderReflector.h"
 #include "Shader/ShaderLoader.h"
 #include "Rendering/GraphicsManager.h"
 #include "components/components.h"
 #include "Rendering/RendererSystem.h"
 #include "vulkanTools/VulkanHelper.h"
-#include "EditorRenderer/ImguiLayer.h"
+
 #include "vulkanTools/CommandManager.h"
 #include "GraphicsResource/TextureInfo.h"
 #include "vulkanTools/VulkanTexture.h"
 #include "Rendering/renderPass.h"
 #include "vulkanTools/FrameBuffer.h"
-#include "Tools/DDSConverter.h"
-#include "imguiHelper/ImguiProperties.h"
-#include "imguiHelper/ImguiScene.h"
-#include "imguiHelper/ImguiGamePlayScene.h"
+
+
 #include "Physics/PhysicsSystem.h"
 #include "Rendering/ObjectPicking.h"
 
-bool isPlaying = true;
-bool startPlaying = true;
+
 
 namespace TDS
 {
-    Application::Application(HINSTANCE hinstance, int& nCmdShow, const wchar_t* classname, WNDPROC wndproc)
+    GamApp::GamApp(HINSTANCE hinstance, int& nCmdShow, const wchar_t* classname, WNDPROC wndproc)
         :m_window(hinstance, nCmdShow, classname)
     {
-        m_window.createWindow(wndproc, 1280,720);
-
-        //m_pVKInst = std::make_shared<VulkanInstance>(m_window);
-        //m_Renderer = std::make_shared<Renderer>(m_window, *m_pVKInst.get());
-        Log::Init();
-        TDS_INFO("window width: {}, window height: {}", m_window.getWidth(), m_window.getHeight());
-
-       /* models = Model::createModelFromFile(*m_pVKInst.get(), "Test.bin");*/
+        m_window.createWindow(wndproc, 1280, 720);
+        //TDS_INFO("window width: {}, window height: {}", m_window.getWidth(), m_window.getHeight());
     }
-    void  Application::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    void  GamApp::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
-        IMGUI_WIN32_WNDPROCHANDLER_FORWARD_DECLARATION;
-        ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam); //for imgui implementation
-        //can extern  some imgui wndproc handler | tbc
         SetWindowHandle(hWnd);
-        
+
         switch (uMsg)
         {
 
@@ -123,35 +108,27 @@ namespace TDS
         }break;
         }
     }
-    void Application::SetWindowHandle(HWND hWnd)
+    void GamApp::SetWindowHandle(HWND hWnd)
     {
         m_handler = hWnd;
     }
-    HWND Application::GetWindowHandle()
+    HWND GamApp::GetWindowHandle()
     {
         return m_handler;
     }
-    void Application::Initialize()
+    void GamApp::Initialize()
     {
-        ShaderReflector::GetInstance()->Init(SHADER_DIRECTORY, REFLECTED_BIN);
-        GraphicsManager::getInstance().Init(&m_window);
-        AssetManager::GetInstance()->PreloadAssets();
- 
+       GraphicsManager::getInstance().Init(&m_window);
+       AssetManager::GetInstance()->PreloadAssets();
 
-        skyboxrender.Init();
+
+       skyboxrender.Init();
     }
 
-    void Application::Update()
+    void GamApp::Update()
     {
-        DDSConverter::Init();
-
-        auto awake = GetFunctionPtr<void(*)(void)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "ExecuteAwake"
-            );
-
+     
+  
         auto executeUpdate = GetFunctionPtr<void(*)(void)>
             (
                 "ScriptAPI",
@@ -179,128 +156,95 @@ namespace TDS
                 "ScriptAPI.EngineInterface",
                 "AddScriptViaName"
             );
-        SceneManager::GetInstance()->toggleScript = GetFunctionPtr<bool(*)(int, const char*)>
+     SceneManager::GetInstance()->toggleScript = GetFunctionPtr<bool(*)(int, const char*)>
             (
                 "ScriptAPI",
                 "ScriptAPI.EngineInterface",
                 "ToggleScriptViaName"
             );
 
-        initImgui();
-        float lightx = 0.f;
+    
 
         while (m_window.processInputEvent())
         {
             TimeStep::CalculateDeltaTime();
             float DeltaTime = TimeStep::GetDeltaTime();
-            std::shared_ptr<EditorScene> pScene = static_pointer_cast<EditorScene>(LevelEditorManager::GetInstance()->panels[SCENE]);
-			std::shared_ptr<GamePlayScene> pGamePlayScene = static_pointer_cast<GamePlayScene>(LevelEditorManager::GetInstance()->panels[GAMEPLAYSCENE]);
-            if (pScene->isFocus)
-            {
-                GraphicsManager::getInstance().setCamera(m_camera);
-                GraphicsManager::getInstance().GetCamera().setEditorCamera(true);
-                GraphicsManager::getInstance().GetCamera().setScrollWheel(true);
+          
+            GraphicsManager::getInstance().setCamera(m_GameCamera);
+            GraphicsManager::getInstance().GetCamera().setEditorCamera(false);
 
-            }
-            else if (pGamePlayScene->isFocus)
-            {
-                GraphicsManager::getInstance().setCamera(m_GameCamera);
-                GraphicsManager::getInstance().GetCamera().setEditorCamera(false);
-            }
-            else
-            {
-                GraphicsManager::getInstance().GetCamera().setScrollWheel(false);
-            }
-
-            GraphicsManager::getInstance().GetCamera().UpdateCamera(DeltaTime, isPlaying);
-
-            lightx = lightx < -1.f ? 1.f : lightx - 0.005f;
-            RendererSystem::lightPosX = lightx;
+           GraphicsManager::getInstance().GetCamera().UpdateCamera(DeltaTime, true);
 
             Vec3 m_windowdimension{ static_cast<float>(m_window.getWidth()), static_cast<float>(m_window.getHeight()), 1.f };
-            if (GraphicsManager::getInstance().getFrameBuffer().getDimensions() != m_windowdimension && m_windowdimension.x >0 && m_windowdimension.y > 0)
+            if (GraphicsManager::getInstance().getFrameBuffer().getDimensions() != m_windowdimension && m_windowdimension.x > 0 && m_windowdimension.y > 0)
             {
                 GraphicsManager::getInstance().getFrameBuffer().resize(m_windowdimension, GraphicsManager::getInstance().getRenderPass().getRenderPass());
-                std::shared_ptr<EditorScene> pScene = static_pointer_cast<EditorScene>(LevelEditorManager::GetInstance()->panels[SCENE]);
-                pScene->Resize();
-
-                std::shared_ptr<GamePlayScene> pGamePlatScene = static_pointer_cast<GamePlayScene>(LevelEditorManager::GetInstance()->panels[GAMEPLAYSCENE]);
-                pGamePlatScene->Resize();
+ 
             }
             GraphicsManager::getInstance().StartFrame();
             VkCommandBuffer commandBuffer = GraphicsManager::getInstance().getCommandBuffer();
             std::uint32_t frame = GraphicsManager::getInstance().GetSwapchainRenderer().getFrameIndex();
-
-            GraphicsManager::getInstance().getRenderPass().beginRenderPass(commandBuffer, &GraphicsManager::getInstance().getFrameBuffer());
-            if (GraphicsManager::getInstance().IsViewingFrom2D() == false)
-                skyboxrender.RenderSkyBox(commandBuffer, frame);
-           
-            if (isPlaying)
-            {
-                if (startPlaying)
-                {
-                    awake();
-                    startPlaying = false;
-                }
-                ecs.runSystems(1, DeltaTime); // Other systems
-                executeUpdate();
-            }
-            else
-            {
-                startPlaying = true;
-                if (PhysicsSystem::GetIsPlaying() || CameraSystem::GetIsPlaying()) // consider moving it to another seperate system (EditorApp?)
-                {
-                    PhysicsSystem::SetIsPlaying(false);
-                    CameraSystem::SetIsPlaying(false);
-                }
-            }
-            ecs.runSystems(2, DeltaTime); // Event handler
-            ecs.runSystems(3, DeltaTime); // Graphics
-         
-            imguiHelper::Update();
-
-            // event handling systems 
-            GraphicsManager::getInstance().getRenderPass().endRenderPass(commandBuffer);
-
-           GraphicsManager::getInstance().getObjectPicker().Update(commandBuffer, frame, Vec2( Input::getMousePosition().x, Input::getMousePosition().y ));
             GraphicsManager::getInstance().GetSwapchainRenderer().BeginSwapChainRenderPass(commandBuffer);
 
-            imguiHelper::Draw(commandBuffer);
+            //GraphicsManager::getInstance().getRenderPass().beginRenderPass(commandBuffer, &GraphicsManager::getInstance().getFrameBuffer());
+            skyboxrender.RenderSkyBox(commandBuffer, frame);
+
+            //if (isPlaying)
+            //{
+            //    if (startPlaying)
+            //    {
+            //        startPlaying = false;
+            //    }
+            ecs.runSystems(1, DeltaTime); // Other systems
+            executeUpdate();
+            //}
+            //else
+            //{
+            //    startPlaying = true;
+            //    //if (PhysicsSystem::GetIsPlaying() || CameraSystem::GetIsPlaying()) // consider moving it to another seperate system (EditorApp?)
+            //    //{
+            //    //    PhysicsSystem::SetIsPlaying(false);
+            //    //    CameraSystem::SetIsPlaying(false);
+            //    //}
+            //}
+            ecs.runSystems(2, DeltaTime); // Event handler
+            ecs.runSystems(3, DeltaTime); // Graphics
+
+          
+            //// event handling systems 
+          //  GraphicsManager::getInstance().getRenderPass().endRenderPass(commandBuffer);
+
+            //GraphicsManager::getInstance().getObjectPicker().Update(commandBuffer, frame, Vec2(Input::getMousePosition().x, Input::getMousePosition().y));
+           
 
             GraphicsManager::getInstance().GetSwapchainRenderer().EndSwapChainRenderPass(commandBuffer);
             GraphicsManager::getInstance().EndFrame();
-            // Reloading
-            if (GetKeyState(VK_F5) & 0x8000)
-            {
-                compileScriptAssembly();
-                SceneManager::GetInstance()->saveCurrentScene();
-                reloadScripts();
-                SceneManager::GetInstance()->loadScene(SceneManager::GetInstance()->getCurrentScene());
-            }
+            //// Reloading
+            //if (GetKeyState(VK_F5) & 0x8000)
+            //{
+            //    compileScriptAssembly();
+            //    SceneManager::GetInstance()->saveCurrentScene();
+            //    reloadScripts();
+            //    SceneManager::GetInstance()->loadScene(SceneManager::GetInstance()->getCurrentScene());
+            //}
 
             Input::scrollStop();
-            
+
         }
-        stopScriptEngine();
-      
+       stopScriptEngine();
+
 
         AssetManager::GetInstance()->ShutDown();
 
-        vkDeviceWaitIdle(GraphicsManager::getInstance().getVkInstance().getVkLogicalDevice());
-        if (m_ImGuiDescPool)
-        {
-            vkDestroyDescriptorPool(GraphicsManager::getInstance().getVkInstance().getVkLogicalDevice(), m_ImGuiDescPool, 0);
-            m_ImGuiDescPool = nullptr;
-        }
-        imguiHelper::Exit();
+        //vkDeviceWaitIdle(GraphicsManager::getInstance().getVkInstance().getVkLogicalDevice());
+      
         ecs.destroy();
-        
+
         skyboxrender.ShutDown();
         GraphicsManager::getInstance().ShutDown();
-        DDSConverter::Destroy();
     }
 
-    void Application::Run()
+    void GamApp::Run()
     {
         startScriptEngine();
         compileScriptAssembly();
@@ -336,13 +280,6 @@ namespace TDS
         // Step 2: Initialize
         init();
 
-        std::shared_ptr<Properties> properties = static_pointer_cast<Properties>(LevelEditorManager::GetInstance()->panels[PanelTypes::PROPERTIES]);
-        properties->getScriptVariables = GetFunctionPtr<std::vector<ScriptValues>(*)(EntityID, std::string)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "GetScriptVariablesEditor"
-            );
 
         SceneManager::GetInstance()->getScriptVariables = GetFunctionPtr<std::vector<ScriptValues>(*)(EntityID, std::string)>
             (
@@ -467,16 +404,23 @@ namespace TDS
         ecs.initializeSystems(1);
         ecs.initializeSystems(2);
         ecs.initializeSystems(3);
+        auto awake = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteAwake"
+            );
+
     }
 
-    Application::~Application()
+    GamApp::~GamApp()
     {
         m_window.~WindowsWin();
     }
 
-    void Application::startScriptEngine()
+    void GamApp::startScriptEngine()
     {
-        // Get the .NET Runtime's path first
+         //Get the .NET Runtime's path first
         const auto DOT_NET_PATH = getDotNetRuntimePath();
         if (DOT_NET_PATH.empty())
             throw std::runtime_error("Failed to find .NET Runtime.");
@@ -511,7 +455,7 @@ namespace TDS
         std::array propertyKeys =
         {
             "TRUSTED_PLATFORM_ASSEMBLIES",      // Trusted assemblies (like the GAC)
-            "APP_PATHS",                        // Directories to probe for application assemblies
+            "APP_PATHS",                        // Directories to probe for GamApp assemblies
         };
         std::array propertyValues =
         {
@@ -541,7 +485,7 @@ namespace TDS
         }
     }
 
-    void Application::stopScriptEngine()
+    void GamApp::stopScriptEngine()
     {
         // Shutdown CoreCLR
         const int RESULT = shutdownCoreClr(hostHandle, domainId);
@@ -554,7 +498,7 @@ namespace TDS
         }
     }
 
-    std::string Application::buildTpaList(const std::string& directory)
+    std::string GamApp::buildTpaList(const std::string& directory)
     {
         // Constants
         const std::string SEARCH_PATH = directory + "\\*.dll";
@@ -579,7 +523,7 @@ namespace TDS
         return tpaList.str();
     }
 
-    void Application::compileScriptAssembly()
+    void GamApp::compileScriptAssembly()
     {
         //relative path to the script assembly project file
         const char* PROJ_PATH =
@@ -647,11 +591,11 @@ namespace TDS
         // Failed build
         else
         {
-             throw std::runtime_error("Failed to build managed scripts!");
+            throw std::runtime_error("Failed to build managed scripts!");
         }
     }
 
-    std::string Application::getDotNetRuntimePath() const
+    std::string GamApp::getDotNetRuntimePath() const
     {
         // Check if any .NET Runtime is even installed
         const std::filesystem::path PATH =
@@ -694,70 +638,6 @@ namespace TDS
             return dotnetPath;
         }
         return "";
-    }
-
-    bool Application::initImgui()
-    {
-        VkDescriptorPoolSize pool_sizes[] =
-        {
-            { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-        };
-
-        VkDescriptorPoolCreateInfo pool_info = {};
-        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-        pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-        pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
-        pool_info.pPoolSizes = pool_sizes;
-
-        vkCreateDescriptorPool(GraphicsManager::getInstance().getVkInstance().getVkLogicalDevice(), &pool_info, nullptr
-            , &m_ImGuiDescPool);
-
-        ImGui_ImplVulkan_InitInfo initInfo{};
-
-        initInfo.Instance = GraphicsManager::getInstance().getVkInstance().getInstance();
-        initInfo.PhysicalDevice = GraphicsManager::getInstance().getVkInstance().getVkPhysicalDevice();
-        initInfo.Device = GraphicsManager::getInstance().getVkInstance().getVkLogicalDevice();
-        initInfo.QueueFamily = GraphicsManager::getInstance().getVkInstance().GetGraphicsQueueIndex();
-        initInfo.Queue = GraphicsManager::getInstance().getVkInstance().getGraphicsQueue();
-        initInfo.PipelineCache = VK_NULL_HANDLE;
-
-
-        initInfo.DescriptorPool = m_ImGuiDescPool;
-        initInfo.Subpass = 0;
-        initInfo.MinImageCount = 2;
-        initInfo.ImageCount = 2;
-        initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-        initInfo.Allocator = nullptr;
-        initInfo.CheckVkResultFn = nullptr;
-
-        imguiHelper::InitializeImgui(initInfo, GraphicsManager::getInstance().GetSwapchainRenderer().getSwapChainRenderPass(), m_window.getWindowHandler());
-
-        if (VkCommandBuffer FCB{ GraphicsManager::getInstance().getVkInstance().beginSingleTimeCommands() }; FCB != nullptr)
-        {
-            imguiHelper::ImguiCreateFont(FCB);
-            GraphicsManager::getInstance().getVkInstance().endSingleTimeCommands(FCB);
-            ImGui_ImplVulkan_DestroyFontUploadObjects();
-        }
-        else
-        {
-            std::cerr << "failed to create command buffer for imgui font creation\n";
-            return false;
-        }
-
-       
-        return true;
-
     }
 
 }// end TDS

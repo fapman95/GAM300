@@ -40,7 +40,7 @@ namespace TDS
 		FrameBuffer*							m_Framebuffer{ nullptr };
 		int										m_LayerID = 0;
 		bool									m_RenderAllLayer = true;
-		bool									m_ViewingFrom2D = false;
+		bool									m_ViewingFrom2D = true;
 		bool									m_FrameHasBegin = false;
 
 		Vec4									m_CurrClearColor;

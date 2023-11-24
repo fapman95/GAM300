@@ -119,17 +119,23 @@ namespace TDS
 		count = 2;
 	
 		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentState(count);
-		for (auto& blendAttState : blendAttachmentState)
+		for (int i{0}; i < blendAttachmentState.size() ;++i)
 		{
-			blendAttState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-			blendAttState.blendEnable = m_BlendingEnabled ? VK_TRUE : VK_FALSE;
-			blendAttState.srcColorBlendFactor = m_PipelineEntry.m_PipelineConfig.m_SrcClrBlend;
-			blendAttState.dstColorBlendFactor = m_PipelineEntry.m_PipelineConfig.m_DstClrBlend;
-			blendAttState.colorBlendOp = m_PipelineEntry.m_PipelineConfig.m_ColorBlend;
-			blendAttState.srcAlphaBlendFactor = m_PipelineEntry.m_PipelineConfig.m_SrcAlphaBlend;
-			blendAttState.dstAlphaBlendFactor = m_PipelineEntry.m_PipelineConfig.m_DstAlphaBlend;
-			blendAttState.alphaBlendOp = m_PipelineEntry.m_PipelineConfig.m_AlphaBlend;
-
+			blendAttachmentState[i].colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			if (i == 1)
+			{
+				blendAttachmentState[i].blendEnable = VK_FALSE;
+			}
+			else
+			{
+				blendAttachmentState[i].blendEnable = m_BlendingEnabled ? VK_TRUE : VK_FALSE;
+			}
+			blendAttachmentState[i].srcColorBlendFactor = m_PipelineEntry.m_PipelineConfig.m_SrcClrBlend;
+			blendAttachmentState[i].dstColorBlendFactor = m_PipelineEntry.m_PipelineConfig.m_DstClrBlend;
+			blendAttachmentState[i].colorBlendOp = m_PipelineEntry.m_PipelineConfig.m_ColorBlend;
+			blendAttachmentState[i].srcAlphaBlendFactor = m_PipelineEntry.m_PipelineConfig.m_SrcAlphaBlend;
+			blendAttachmentState[i].dstAlphaBlendFactor = m_PipelineEntry.m_PipelineConfig.m_DstAlphaBlend;
+			blendAttachmentState[i].alphaBlendOp = m_PipelineEntry.m_PipelineConfig.m_AlphaBlend;
 
 		}
 
@@ -878,7 +884,7 @@ namespace TDS
 					//If not they will default to local buffers. Then u gonna waste memory and rendering cycles
 					if (GlobalBufferPool::GetInstance()->BindingExist(uniform.second.m_BindingPoint))
 					{
-						TDS_INFO("This is a global buffer!\n");
+						//TDS_INFO("This is a global buffer!\n");
 						GlobalBuffer = true;
 
 					}
