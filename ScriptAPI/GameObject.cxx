@@ -32,7 +32,23 @@ namespace ScriptAPI
 		return TransformComponent(entityID);
 	}
 
-	int GameObject::GetEntityID()
+	UISpriteComponent GameObject::GetUISpriteComponent()
+	{
+		return UISpriteComponent(entityID);
+	}
+
+	bool GameObject::activeInHierarchy(TDS::EntityID entityID)
+	{
+		return TDS::ecs.getEntityIsEnabled(entityID);
+	}
+
+	void GameObject::SetActive(TDS::EntityID entityID, bool status)
+	{
+		TDS::ecs.setEntityIsEnabled(entityID, status);
+		return;
+	}
+
+	TDS::EntityID GameObject::GetEntityID()
 	{
 		return entityID;
 	}
@@ -69,6 +85,10 @@ namespace ScriptAPI
 		else if (type == TransformComponent::typeid)
 		{
 			return safe_cast<T>(GetTransformComponent());
+		}
+		else if (type == UISpriteComponent::typeid)
+		{
+			return safe_cast<T>(GetUISpriteComponent());
 		}
 
 		return T();

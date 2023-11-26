@@ -475,6 +475,9 @@
         "1": {},
         "2": {
             "PlayButton": {
+                "mouseonbutton": {
+                    "Bool": false
+                },
                 "gameObject": {
                     "GameObject": 2
                 },
@@ -485,7 +488,7 @@
                     "Bool": false
                 },
                 "is_Start": {
-                    "Bool": false
+                    "Bool": true
                 }
             }
         },

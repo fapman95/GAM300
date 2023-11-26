@@ -71,7 +71,6 @@ namespace ScriptAPI
     public ref class ScriptSystem
     {
     public:
-
         generic <typename TResult>
         static IAsyncEnumerable<TResult>^ UnityCoroutine(Func<IAsyncEnumerable<TResult>^>^ func, int duration)
         {
@@ -82,7 +81,7 @@ namespace ScriptAPI
             {
                 Thread::Sleep(1);
             }
-
+            
             return func();
         }
 
@@ -106,29 +105,6 @@ namespace ScriptAPI
             /*return Task::FromResult(result);*/
             return func();
         }
-
-        //static void OnTriggerEnter(BoxColliderComponent collider);
-
-        //static void OnTriggerEnter(SphereColliderComponent collider);
-
-        //static void OnTriggerEnter(CapsuleColliderComponent collider);
-
-        //static void OnTriggerStay(BoxColliderComponent collider);
-
-        //static void OnTriggerStay(SphereColliderComponent collider);
-
-        //static void OnTriggerStay(CapsuleColliderComponent collider);
-
-        //static void OnTriggerExit(BoxColliderComponent collider);
-
-        //static void OnTriggerExit(SphereColliderComponent collider);
-
-        //static void OnTriggerExit(CapsuleColliderComponent collider);
-
-        //static float Clamp(float num1, float num2, float num3)
-        //{
-        //    return std::clamp(num1, num2, num3);
-        //}
 
     };
 }

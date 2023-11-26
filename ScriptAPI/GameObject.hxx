@@ -6,6 +6,8 @@
 #include "Components/RigidBodyComponent.hxx"
 #include "Components/SphereColliderComponent.hxx"
 #include "Components/TransformComponent.hxx"
+#include "Components/UISpriteComponent.hxx"
+#include "ecs/ecs.h"
 
 namespace ScriptAPI
 {
@@ -22,8 +24,12 @@ namespace ScriptAPI
         RigidBodyComponent GetRigidBodyComponent();
         SphereColliderComponent GetSphereColliderComponent();
         TransformComponent GetTransformComponent();
+        UISpriteComponent GetUISpriteComponent();
 
-        int GetEntityID();
+        bool activeInHierarchy(TDS::EntityID entityID);
+        void SetActive(TDS::EntityID entityID, bool status);
+
+        TDS::EntityID GetEntityID();
 
         TransformComponent transform;
 

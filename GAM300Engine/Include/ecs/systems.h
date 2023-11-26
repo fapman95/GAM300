@@ -24,7 +24,7 @@ namespace TDS
 	// Layer 3 - Event Handler (always running)
 	// Layer 3 - Graphics (always running)
 
-	ECSSystem<Transform, RigidBody>					_PhysicsSystem(1);
+	ECSSystem<Transform, RigidBody, GraphicsComponent>					_PhysicsSystem(1);
 	ECSSystem<AI>									_AISystem(1);
 	ECSSystem<Transform, CameraComponent>			_CameraSystem(1);
 
@@ -33,6 +33,7 @@ namespace TDS
 
 	ECSSystem<Transform, GraphicsComponent>			_RenderSystem(3);
 	ECSSystem<Transform, UISprite>					_UiSystem(3);
+	ECSSystem<SoundInfo>							_AudioSystem(3);
 }
 
 #endif // SYSTEMS

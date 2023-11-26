@@ -36,8 +36,9 @@ namespace TDS
     GamApp::GamApp(HINSTANCE hinstance, int& nCmdShow, const wchar_t* classname, WNDPROC wndproc)
         :m_window(hinstance, nCmdShow, classname)
     {
+        Log::Init();
         m_window.createWindow(wndproc, 1280, 720);
-        //TDS_INFO("window width: {}, window height: {}", m_window.getWidth(), m_window.getHeight());
+        TDS_INFO("window width: {}, window height: {}", m_window.getWidth(), m_window.getHeight());
     }
     void  GamApp::handleMessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
@@ -120,15 +121,27 @@ namespace TDS
     {
        GraphicsManager::getInstance().Init(&m_window);
        AssetManager::GetInstance()->PreloadAssets();
-
-
        skyboxrender.Init();
+    }
+
+    void GamApp::FixedUpdate()
+    {
+        mAccumulatedTime += TimeStep::GetFixedDeltaTime();
+        auto executeFixedUpdate = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteFixedUpdate"
+            );
+        while (mAccumulatedTime > TimeStep::GetFixedDeltaTime())
+        {
+            executeFixedUpdate();
+            mAccumulatedTime -= TimeStep::GetFixedDeltaTime();
+        }
     }
 
     void GamApp::Update()
     {
-     
-  
         auto executeUpdate = GetFunctionPtr<void(*)(void)>
             (
                 "ScriptAPI",
@@ -136,36 +149,7 @@ namespace TDS
                 "ExecuteUpdate"
             );
 
-        auto executeLateUpdate = GetFunctionPtr<void(*)(void)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "ExecuteLateUpdate"
-            );
-
-        auto reloadScripts = GetFunctionPtr<void(*)(void)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "Reload"
-            );
-
-        auto addScript = GetFunctionPtr<bool(*)(int, const char*)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "AddScriptViaName"
-            );
-     SceneManager::GetInstance()->toggleScript = GetFunctionPtr<bool(*)(int, const char*)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "ToggleScriptViaName"
-            );
-
-    
-
-        while (m_window.processInputEvent())
+        while (m_window.processInputEvent()) //while is_playing?
         {
             TimeStep::CalculateDeltaTime();
             float DeltaTime = TimeStep::GetDeltaTime();
@@ -184,64 +168,51 @@ namespace TDS
             GraphicsManager::getInstance().StartFrame();
             VkCommandBuffer commandBuffer = GraphicsManager::getInstance().getCommandBuffer();
             std::uint32_t frame = GraphicsManager::getInstance().GetSwapchainRenderer().getFrameIndex();
-            GraphicsManager::getInstance().GetSwapchainRenderer().BeginSwapChainRenderPass(commandBuffer);
+            
 
-            //GraphicsManager::getInstance().getRenderPass().beginRenderPass(commandBuffer, &GraphicsManager::getInstance().getFrameBuffer());
+            GraphicsManager::getInstance().getRenderPass().beginRenderPass(commandBuffer, &GraphicsManager::getInstance().getFrameBuffer());
+
             skyboxrender.RenderSkyBox(commandBuffer, frame);
 
-            //if (isPlaying)
-            //{
-            //    if (startPlaying)
-            //    {
-            //        startPlaying = false;
-            //    }
+            FixedUpdate();
             ecs.runSystems(1, DeltaTime); // Other systems
             executeUpdate();
-            //}
-            //else
-            //{
-            //    startPlaying = true;
-            //    //if (PhysicsSystem::GetIsPlaying() || CameraSystem::GetIsPlaying()) // consider moving it to another seperate system (EditorApp?)
-            //    //{
-            //    //    PhysicsSystem::SetIsPlaying(false);
-            //    //    CameraSystem::SetIsPlaying(false);
-            //    //}
-            //}
+            LateUpdate();
             ecs.runSystems(2, DeltaTime); // Event handler
             ecs.runSystems(3, DeltaTime); // Graphics
 
           
             //// event handling systems 
-          //  GraphicsManager::getInstance().getRenderPass().endRenderPass(commandBuffer);
+            GraphicsManager::getInstance().getRenderPass().endRenderPass(commandBuffer);
 
             //GraphicsManager::getInstance().getObjectPicker().Update(commandBuffer, frame, Vec2(Input::getMousePosition().x, Input::getMousePosition().y));
            
 
+            GraphicsManager::getInstance().GetSwapchainRenderer().BeginSwapChainRenderPass(commandBuffer);
+            GraphicsManager::getInstance().RenderFullScreen();
             GraphicsManager::getInstance().GetSwapchainRenderer().EndSwapChainRenderPass(commandBuffer);
             GraphicsManager::getInstance().EndFrame();
-            //// Reloading
-            //if (GetKeyState(VK_F5) & 0x8000)
-            //{
-            //    compileScriptAssembly();
-            //    SceneManager::GetInstance()->saveCurrentScene();
-            //    reloadScripts();
-            //    SceneManager::GetInstance()->loadScene(SceneManager::GetInstance()->getCurrentScene());
-            //}
 
             Input::scrollStop();
 
         }
-       stopScriptEngine();
-
-
+        stopScriptEngine();
         AssetManager::GetInstance()->ShutDown();
-
         //vkDeviceWaitIdle(GraphicsManager::getInstance().getVkInstance().getVkLogicalDevice());
-      
         ecs.destroy();
-
         skyboxrender.ShutDown();
         GraphicsManager::getInstance().ShutDown();
+    }
+
+    void GamApp::LateUpdate()
+    {
+        auto executeLateUpdate = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteLateUpdate"
+            );
+        executeLateUpdate();
     }
 
     void GamApp::Run()
@@ -257,12 +228,8 @@ namespace TDS
                 "Init"
             );
 
-        auto reloadScripts = GetFunctionPtr<void(*)(void)>
-            (
-                "ScriptAPI",
-                "ScriptAPI.EngineInterface",
-                "Reload"
-            );
+        // Step 2: Initialize
+        init();
 
         SceneManager::GetInstance()->addScript = GetFunctionPtr<bool(*)(EntityID, std::string)>
             (
@@ -276,10 +243,6 @@ namespace TDS
                 "ScriptAPI.EngineInterface",
                 "RemoveScriptViaName"
             );
-
-        // Step 2: Initialize
-        init();
-
 
         SceneManager::GetInstance()->getScriptVariables = GetFunctionPtr<std::vector<ScriptValues>(*)(EntityID, std::string)>
             (
@@ -400,17 +363,53 @@ namespace TDS
                 "IsScriptEnabled"
             );
 
-        SceneManager::GetInstance()->Init();
-        ecs.initializeSystems(1);
-        ecs.initializeSystems(2);
-        ecs.initializeSystems(3);
-        auto awake = GetFunctionPtr<void(*)(void)>
+        SceneManager::GetInstance()->awake = GetFunctionPtr<void(*)(void)>
             (
                 "ScriptAPI",
                 "ScriptAPI.EngineInterface",
                 "ExecuteAwake"
             );
 
+        SceneManager::GetInstance()->start = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteStart"
+            );
+
+        SceneManager::GetInstance()->Init();
+        ecs.initializeSystems(1);
+        ecs.initializeSystems(2);
+        ecs.initializeSystems(3);
+        //auto awake = GetFunctionPtr<void(*)(void)>
+        //    (
+        //        "ScriptAPI",
+        //        "ScriptAPI.EngineInterface",
+        //        "ExecuteAwake"
+        //    );
+        //awake();
+    }
+
+    void GamApp::Awake()
+    {
+        auto awake = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteAwake"
+            );
+        awake();
+    }
+
+    void GamApp::Start()
+    {
+        auto start = GetFunctionPtr<void(*)(void)>
+            (
+                "ScriptAPI",
+                "ScriptAPI.EngineInterface",
+                "ExecuteStart"
+            );
+        start();
     }
 
     GamApp::~GamApp()

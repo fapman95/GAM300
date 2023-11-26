@@ -16,7 +16,7 @@ namespace TDS
 		updateViewMatrix();
 	}
 
-	
+
 	Mat4 TDSCamera::GetViewMatrix() const
 	{
 		return Mat4::LookAt(m_Position, m_Position + m_Front, m_Up);
@@ -137,14 +137,17 @@ namespace TDS
 		else // gameIsPlaying
 		{
 			// for exe to get its local coordinate if imgui is not running 
-			/*RECT win;
+			RECT win;
 			GetClientRect(GraphicsManager::getInstance().GetWindow()->getWindowHandler(), &win);
-			float hlfWidth = (win.right - win.left) * 0.5f;
-			float hlfHeight = (win.bottom - win.top) * 0.5f;
-			Input::mousePosition mosPos = Input::getMousePosition();
-			Vec2 mousePos = { float(mosPos.x - hlfWidth) / float(win.right - win.left), float(mosPos.y - hlfHeight) / (win.bottom - win.top)};
-			Input::setLocalMousePos(mousePos);*/
+			float Width = (win.right - win.left);
+			float Height = (win.bottom - win.top);
+			Input::mousePosition globalMousePos = Input::getMousePosition();
+			
+			float normalizedLocalMouseX = (globalMousePos.x / Width) * 2 - 1;
+			float normalizedLocalMouseY = (globalMousePos.y / Height) * 2 - 1;
+			Vec2 localMousePos = { normalizedLocalMouseX, normalizedLocalMouseY };
 
+			Input::setLocalMousePos(localMousePos);
 		}
 	}
 
@@ -155,31 +158,31 @@ namespace TDS
 		{
 			switch (Input::keyCode)
 			{
-				case TDS_W:
-					return keys.up = true;
-					break;
+			case TDS_W:
+				return keys.up = true;
+				break;
 
-				case TDS_A:
-					return keys.left = true;
-					break;
+			case TDS_A:
+				return keys.left = true;
+				break;
 
-				case TDS_S:
-					return keys.down = true;
-					break;
+			case TDS_S:
+				return keys.down = true;
+				break;
 
-				case TDS_D:
-					return keys.right = true;
+			case TDS_D:
+				return keys.right = true;
 
-				default:
-					return false;
+			default:
+				return false;
 			}
 		}
 		else
 		{
-			keys.up		= false;		  
-			keys.left	= false;				  
-			keys.down	= false;			  
-			keys.right	= false;
+			keys.up = false;
+			keys.left = false;
+			keys.down = false;
+			keys.right = false;
 		}
 		return false;
 	}

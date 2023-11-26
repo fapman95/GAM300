@@ -22,6 +22,7 @@
 #include "Logger/Logger.h"
 #include "Physics/JPHLayers.h"
 #include "eventmanager/eventHandler.h"
+#include "components/GraphicsComponent.h"
 
 #include "JoltPhysics/Utils/JoltConversionUtils.h"
 
@@ -38,7 +39,6 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
-
 JPH_SUPPRESS_WARNINGS
 
 // X = moving left, right
@@ -54,12 +54,14 @@ namespace TDS
 		 * Physics System Init and Update (Will be used by the ECS)
 		 ***************************************************************************/
 		static void PhysicsSystemInit();
-		static void PhysicsSystemUpdate(const float dt, const std::vector<EntityID>& entities, Transform* _transform, RigidBody* _rigidbody);
+		static void PhysicsSystemUpdate(const float dt, const std::vector<EntityID>& entities, Transform* _transform, RigidBody* _rigidbody, GraphicsComponent* _graphics);
 		
 		// potentially need move somewhere
 		static void SetIsPlaying(bool input) { m_oneTimeInit = input; }
 		static bool GetIsPlaying() { return m_oneTimeInit; }
 		static std::unique_ptr<JPH::PhysicsSystem>			m_pSystem; // unsafe to be public but for now it is
+
+		static void SensorActivated( RigidBody* _rigidbody);
 	private:
 		void JPH_SystemShutdown();
 
@@ -77,6 +79,7 @@ namespace TDS
 		// Jolt Physics Global Settings
 		static std::unique_ptr<JPH::TempAllocatorImpl>		m_pTempAllocator;
 		static std::unique_ptr<JPH::JobSystemThreadPool>	m_pJobSystem;
+		static std::unique_ptr<JPH::BodyManager>			m_BodyManager;
 		inline static bool m_oneTimeInit					= false;
 
 		// Container that holds all the bodyID

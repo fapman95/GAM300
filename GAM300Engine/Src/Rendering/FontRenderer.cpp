@@ -229,7 +229,7 @@ namespace TDS
 	{
 		m_Pipeline->SetCommandBuffer(commandBuffer);
 		m_Pipeline->BindPipeline();
-		m_FontBatch.m_SceneUpdate.ViewingFrom2D = GraphicsManager::getInstance().IsViewingFrom2D() ? 1 : 0;
+		m_FontBatch.m_SceneUpdate.ViewingFrom2D = 1;
 		if (m_FontBatch.m_SceneUpdate.ViewingFrom2D == false)
 		{
 			m_FontBatch.m_SceneUpdate.Projection = Mat4::Perspective(GraphicsManager::getInstance().GetCamera().m_Fov * Mathf::Deg2Rad,
@@ -315,7 +315,7 @@ namespace TDS
 			}
 			else
 			{
-				transform->GenerateTransfom();
+				transform->GenerateTransform();
 			}
 			Mat4 temp = transform->GetTransformMatrix();
 			double charWidth = (glyph.m_PlaneBounds.m_Right - glyph.m_PlaneBounds.m_Left);
@@ -339,6 +339,10 @@ namespace TDS
 			{
 				finalOffset.y = float(CurrOffset.y + (charHeight * 0.25));
 			}
+			else if (eachchar == '\"' || eachchar == '\'')
+			{
+				finalOffset.y = float(CurrOffset.y + (charHeight + (charHeight * 0.75)));
+			}
 			else
 			{
 				finalOffset.y = float(CurrOffset.y + (charHeight * 0.5));
@@ -359,10 +363,16 @@ namespace TDS
 
 	void DLL_API FontBatch::PrepareBatch()
 	{
+
 		for (std::uint32_t i = 0; i < m_InstanceCnt; ++i)
 		{
 			for (std::uint32_t layer = 0; layer < 12; ++layer)
 			{
+				if (GraphicsManager::getInstance().RenderAllLayer() == false)
+				{
+					if (GraphicsManager::getInstance().LayerToRender() != i)
+						continue;
+				}
 				auto& instanceinfo = m_InstanceInfo[i];
 				if (layer == instanceinfo.m_LayerID)
 				{

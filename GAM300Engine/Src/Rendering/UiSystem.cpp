@@ -8,24 +8,39 @@
 #define _BATCH
 namespace TDS
 {
+	std::unordered_map<int, bool> UiSystem::m_Layers;
 	void UiSystem::Init()
 	{
+		GraphicsManager::getInstance().ToggleRenderAllLayer(true);
+	}
+	void UiSystem::ToggleEnableLayer(int layerID, bool condition)
+	{
+		m_Layers[layerID] = condition;
 	}
 	void UiSystem::Update(const float dt, const std::vector<EntityID>& entities, Transform* transform, UISprite* _Sprite)
 	{
 
-		//if (GraphicsManager::getInstance().IsViewingFrom2D() == false)
-		//	return;
-
 		if (_Sprite == nullptr)
 			return;
-		
+
 		auto frame = GraphicsManager::getInstance().GetSwapchainRenderer().getFrameIndex();
 		auto cmdBuffer = GraphicsManager::getInstance().getCommandBuffer();
 		FontBatch& Fontbatch = FontRenderer::GetInstance()->GetBatchList();
 		SpriteBatch& Spritebatch = Renderer2D::GetInstance()->GetBatchList();
 		for (size_t i = 0; i < entities.size(); ++i)
 		{
+			if (_Sprite[i].m_LayerID == -1)
+				continue;
+
+			if (GraphicsManager::getInstance().RenderAllLayer() == false)
+			{
+				int getLayerToRender = GraphicsManager::getInstance().LayerToRender();
+				if (getLayerToRender != _Sprite[i].m_LayerID)
+					continue;
+			}
+
+			if (_Sprite[i].m_EnableSprite == false)
+				continue;
 			if (!ecs.getEntityIsEnabled(entities[i]) || !ecs.getComponentIsEnabled<UISprite>(entities[i]))
 			{
 				continue;
@@ -33,7 +48,7 @@ namespace TDS
 
 			if (_Sprite[i].m_IsFont)
 				Fontbatch.AddToBatch(&_Sprite[i], &transform[i], entities[i]);
-			
+
 			else
 			{
 				Spritebatch.AddToBatch(&_Sprite[i], &transform[i], entities[i]);
@@ -42,7 +57,7 @@ namespace TDS
 					UpdateAABB(&_Sprite[i], &transform[i]);
 				}
 			}
-			
+
 		}
 		//TDS_INFO(Input::getLocalMousePos());
 		Spritebatch.PrepareBatch();
@@ -94,7 +109,7 @@ namespace TDS
 			Vec3(0.5f, 0.5f, 0.0f),
 			Vec3(-0.5f, 0.5f, 0.0f)
 		};
-		
+
 		Vec3 newMin = Vec3(FLT_MAX, FLT_MAX, 0.0f);
 		Vec3 newMax = Vec3(-FLT_MAX, -FLT_MAX, 0.0f);
 
@@ -110,6 +125,27 @@ namespace TDS
 		// Update the sprite's AABB
 		_Sprite->m_BoundingBoxMin = Vec2(newMin.x, newMin.y);
 		_Sprite->m_BoundingBoxMax = Vec2(newMax.x, newMax.y);
+	}
+
+	void UiSystem::UpdatePropertiesFromParent(EntityID current, UISprite* _CurrentSprite)
+	{
+		auto tag = ecs.getComponent<NameTag>(current);
+		if (tag == nullptr)
+			return;
+
+		if (tag->GetHierarchyParent() == 0)
+			return;
+		else
+		{
+			EntityID parent = tag->GetHierarchyParent();
+			auto UiSprite = ecs.getComponent<UISprite>(parent);
+			if (UiSprite == nullptr)
+				return;
+			else
+			{
+				_CurrentSprite->m_EnableSprite = UiSprite->m_EnableSprite;
+			}
+		}
 	}
 
 }
