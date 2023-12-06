@@ -2,6 +2,7 @@
 
 #include "ComponentBase.hxx"
 #include "TransformComponent.hxx"
+#include "../TypeConversion.hxx"
 
 namespace ScriptAPI
 {
@@ -19,6 +20,8 @@ namespace ScriptAPI
 		bool isMuted();
 		bool isPlaying();
 		bool isPaused();
+		//Check if that sound file finished playing
+		bool finished(System::String^ str_path);
 
 		Vector3 get3DCoords();
 		snd getState();
@@ -27,7 +30,7 @@ namespace ScriptAPI
 		std::string getFilePath();
 		const char* getFilePath_inChar();
 
-		void setFilePath(std::string str_path);
+		void setFilePath(System::String^ str_path);
 
 		float getX();
 		float getY();
@@ -42,9 +45,17 @@ namespace ScriptAPI
 		void set3D(bool condition);
 		void setMute(bool condition);
 
-		void play();
-		void pause();
-		void stop();
+		//Pass in the audio file name without the extensions
+		void play(System::String^ pathing);
+
+		//play the queue of sound sequentially
+		void playQueue();
+		void clearQueue();
+		void pause(System::String^ pathing);
+		void stop(System::String^ pathing);
+
+		//Add to a queue of sound to be played sequentially
+		void Queue(System::String^ str);
 
 		virtual void SetEntityID(TDS::EntityID ID);
 
@@ -106,5 +117,13 @@ namespace ScriptAPI
 		}
 
 		TDS::EntityID entityID;
+	};
+
+	public ref class Audio
+	{
+	public:
+		//Pass in the audio file name without the extensions
+		static void play(System::String^ pathing);
+		static void stop(System::String^ pathing);
 	};
 }

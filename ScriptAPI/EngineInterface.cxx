@@ -3,6 +3,8 @@
 #include "TypeConversion.hxx"
 #include "HelperFunctions.hxx"
 #include "Time.hxx"
+#include "SceneLoader.hxx"
+#include "Screen.hxx"
 #include "../GAM300Engine/Include/Timestep/Timestep.h"
 using namespace System;
 using namespace System::Runtime::InteropServices;
@@ -33,8 +35,11 @@ namespace ScriptAPI
         scripts = gcnew System::Collections::Generic::SortedList<TDS::EntityID, ScriptList^>();
         gameObjectList = gcnew System::Collections::Generic::SortedList<TDS::EntityID, Tuple<System::String^, GameObject^>^>();
 
+        Screen();
         updateScriptTypeList();
         Input::InputSetup();
+        SceneLoader::dataPath = toSystemString(TDS::GetAssetFolder());
+        fixedUpdateTimer = TDS::TimeStep::GetFixedDeltaTime();
         System::Console::WriteLine("Hello Engine Interface Init!");
     }
 
@@ -269,7 +274,6 @@ namespace ScriptAPI
             {
                 for each (NameScriptPair ^ script in scripts[i])
                 {
-                    Console::WriteLine(script->Value->GetType());
                     SAFE_NATIVE_CALL_BEGIN
                         if (script->Value->isScriptEnabled())
                         {
@@ -296,20 +300,25 @@ namespace ScriptAPI
     ***************************************************************************/
     void EngineInterface::ExecuteFixedUpdate()
     {
-        for each (auto i in TDS::ecs.getEntities())
+        mAccumulatedTime += fixedUpdateTimer;
+        while (mAccumulatedTime > fixedUpdateTimer)
         {
-            if (scripts->ContainsKey(i) && TDS::ecs.getEntityIsEnabled(i))
+            for each (auto i in TDS::ecs.getEntities())
             {
-                for each (NameScriptPair ^ script in scripts[i])
+                if (scripts->ContainsKey(i) && TDS::ecs.getEntityIsEnabled(i))
                 {
-                    SAFE_NATIVE_CALL_BEGIN
-                        if (script->Value->isScriptEnabled())
-                        {
-                            script->Value->FixedUpdate();
-                        }
-                    SAFE_NATIVE_CALL_END
+                    for each (NameScriptPair ^ script in scripts[i])
+                    {
+                        SAFE_NATIVE_CALL_BEGIN
+                            if (script->Value->isScriptEnabled())
+                            {
+                                script->Value->FixedUpdate();
+                            }
+                        SAFE_NATIVE_CALL_END
+                    }
                 }
             }
+            mAccumulatedTime -= fixedUpdateTimer;
         }
     }
 
@@ -560,8 +569,23 @@ namespace ScriptAPI
                         newScriptValue.type = "Transform";
                         newScriptValue.referenceEntityID = safe_cast<TransformComponent^>(field->GetValue(obj))->GetEntityID();
                     }
+                    else if (field->FieldType->ToString() == "ScriptAPI.UISpriteComponent")
+                    {
+                        newScriptValue.type = "UI Sprite";
+                        newScriptValue.referenceEntityID = safe_cast<UISpriteComponent^>(field->GetValue(obj))->GetEntityID();
+                    }
+                    else if (field->FieldType->ToString() == "ScriptAPI.GraphicComponent")
+                    {
+                        newScriptValue.type = "Graphics Component";
+                        newScriptValue.referenceEntityID = safe_cast<GraphicComponent^>(field->GetValue(obj))->GetEntityID();
+                    }
+                    else if (field->FieldType->ToString() == "ScriptAPI.AudioComponent")
+                    {
+                        newScriptValue.type = "Audio";
+                        newScriptValue.referenceEntityID = safe_cast<AudioComponent^>(field->GetValue(obj))->GetEntityID();
+                    }
                     // Script =========================================================================================
-                    else 
+                    else if (field->FieldType->ToString()->Contains("ScriptAPI"))
                     {
                         newScriptValue.referenceEntityID = safe_cast<Script^>(field->GetValue(obj))->gameObject->GetEntityID();
                     }
@@ -676,7 +700,22 @@ namespace ScriptAPI
                     newScriptValue.type = "Component";
                     newScriptValue.referenceEntityID = safe_cast<TransformComponent^>(field->GetValue(obj))->GetEntityID();
                 }
-                else // Script
+                else if (field->FieldType->ToString() == "ScriptAPI.UISpriteComponent")
+                {
+                    newScriptValue.type = "Component";
+                    newScriptValue.referenceEntityID = safe_cast<UISpriteComponent^>(field->GetValue(obj))->GetEntityID();
+                }
+                else if (field->FieldType->ToString() == "ScriptAPI.GraphicComponent")
+                {
+                    newScriptValue.type = "Component";
+                    newScriptValue.referenceEntityID = safe_cast<GraphicComponent^>(field->GetValue(obj))->GetEntityID();
+                }
+                else if (field->FieldType->ToString() == "ScriptAPI.AudioComponent")
+                {
+                    newScriptValue.type = "Component";
+                    newScriptValue.referenceEntityID = safe_cast<AudioComponent^>(field->GetValue(obj))->GetEntityID();
+                }
+                else if (field->FieldType->ToString()->Contains("ScriptAPI")) // Script
                 {
                     newScriptValue.referenceEntityID = safe_cast<Script^>(field->GetValue(obj))->gameObject->GetEntityID();
                 }
@@ -971,6 +1010,7 @@ namespace ScriptAPI
 
         if (currentFieldArray == nullptr)
         {
+            Console::WriteLine("right...");
             return;
         }
 
@@ -1053,6 +1093,12 @@ namespace ScriptAPI
     System::Collections::Generic::SortedList<TDS::EntityID, EngineInterface::ScriptList^>^ EngineInterface::GetScriptList()
     {
         return scripts;
+    }
+
+    Object^ EngineInterface::GetScriptByEntityID(TDS::EntityID entityID, System::String^ scriptName)
+    {
+        Object^ currentObject = scripts[entityID][scriptName];
+        return currentObject;
     }
 
     // To do

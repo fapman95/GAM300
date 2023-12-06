@@ -1,9 +1,14 @@
 ﻿using ScriptAPI;
 using System;
-    
+
 public class FPS_Controller_Script : Script
 {
     public RigidBodyComponent rb;
+    public string startingVOstr;   //To be changed
+    public AudioComponent startingVO;   //To be changed
+    public string[] footStepSoundEffects;
+    private int currentFootStepPlaying;
+    AudioComponent audio;
 
     #region Camera Movement Variables
     [Header("Camera Movement Variables")]
@@ -44,6 +49,9 @@ public class FPS_Controller_Script : Script
     public float walkSpeed = 2f;
     public float maxVelocityChange = 10f;
     public bool isWalking = false;
+    public bool isCollided = false;
+    private GameObject collidedEntity;
+
 
     #region Sprint
     public bool enableSprint = true;
@@ -114,9 +122,9 @@ public class FPS_Controller_Script : Script
 
     public override void Awake()
     {
-        rb = transform.gameObject.GetComponent<RigidBodyComponent>();
-        //rb = gameObject.GetComponent<RigidBodyComponent>();
-
+        rb = gameObject.GetComponent<RigidBodyComponent>();
+        startingVO = gameObject.GetComponent<AudioComponent>();
+        startingVOstr = "pc_lockpickstart";
         // Set internal variables
         playerCamera.SetFieldOfView(fov);
         originalScale = transform.GetScale();
@@ -127,6 +135,16 @@ public class FPS_Controller_Script : Script
             sprintRemaining = sprintDuration;
             sprintCooldownReset = sprintCooldown;
         }
+
+        footStepSoundEffects = new string[5];
+        footStepSoundEffects[0] = "temp_step1";
+        footStepSoundEffects[1] = "temp_step2";
+        footStepSoundEffects[2] = "temp_step3";
+        footStepSoundEffects[3] = "temp_step4";
+        footStepSoundEffects[4] = "temp_step5";
+
+        currentFootStepPlaying = 0;
+        audio = gameObject.GetComponent<AudioComponent>();
     }
     public override void Start()
     {
@@ -173,6 +191,7 @@ public class FPS_Controller_Script : Script
             //sprintBar.gameObject.SetActive(false);
         }
         #endregion
+
     }
     public override void Update()
     {
@@ -201,50 +220,60 @@ public class FPS_Controller_Script : Script
                 playerCamera.transform.SetRotationX(pitch);
                 playerCamera.transform.SetRotationY(transform.GetRotation().Y);
             }
+            if (Input.GetLocalMousePosX() > 0.8f)
+            {
+                yaw++;
+                transform.SetRotationY(yaw);
+            }
+            if (Input.GetLocalMousePosX() < -0.8f)
+            {
+                yaw--;
+                transform.SetRotationY(yaw);
+            }
         }
 
         #region Camera Zoom
 
-        //if (enableZoom)
-        //{
-        //    // Changes isZoomed when key is pressed
-        //    // Behavior for toogle zoom
-        //    if (Input.GetKeyDown(zoomKey) && !holdToZoom && !isSprinting)
-        //    {
-        //        if (!isZoomed)
-        //        {
-        //            isZoomed = true;
-        //        }
-        //        else
-        //        {
-        //            isZoomed = false;
-        //        }
-        //    }
+        if (enableZoom)
+        {
+            // Changes isZoomed when key is pressed
+            // Behavior for toogle zoom
+            if (Input.GetKeyDown(zoomKey) && !holdToZoom && !isSprinting)
+            {
+                if (!isZoomed)
+                {
+                    isZoomed = true;
+                }
+                else
+                {
+                    isZoomed = false;
+                }
+            }
 
-        //    // Changes isZoomed when key is pressed
-        //    // Behavior for hold to zoom
-        //    if (holdToZoom && !isSprinting)
-        //    {
-        //        if (Input.GetKeyDown(zoomKey))
-        //        {
-        //            isZoomed = true;
-        //        }
-        //        else if (Input.GetKeyUp(zoomKey))
-        //        {
-        //            isZoomed = false;
-        //        }
-        //    }
+            // Changes isZoomed when key is pressed
+            // Behavior for hold to zoom
+            if (holdToZoom && !isSprinting)
+            {
+                if (Input.GetKeyDown(zoomKey))
+                {
+                    isZoomed = true;
+                }
+                else if (Input.GetKeyUp(zoomKey))
+                {
+                    isZoomed = false;
+                }
+            }
 
-        //    // Lerps camera.fieldOfView to allow for a smooth transistion
-        //    if (isZoomed)
-        //    {
-        //        playerCamera.SetFieldOfView(Mathf.Lerp(playerCamera.GetFieldOfView(), zoomFOV, zoomStepTime * Time.deltaTime));
-        //    }
-        //    else if (!isZoomed && !isSprinting)
-        //    {
-        //        playerCamera.SetFieldOfView(Mathf.Lerp(playerCamera.GetFieldOfView(), fov, zoomStepTime * Time.deltaTime));
-        //    }
-        //}
+            // Lerps camera.fieldOfView to allow for a smooth transistion
+            if (isZoomed)
+            {
+                playerCamera.SetFieldOfView(Mathf.Lerp(playerCamera.GetFieldOfView(), zoomFOV, zoomStepTime * Time.deltaTime));
+            }
+            else if (!isZoomed && !isSprinting)
+            {
+                playerCamera.SetFieldOfView(Mathf.Lerp(playerCamera.GetFieldOfView(), fov, zoomStepTime * Time.deltaTime));
+            }
+        }
 
         #endregion
         #endregion
@@ -272,14 +301,14 @@ public class FPS_Controller_Script : Script
             else
             {
                 // Regain sprint while not sprinting
-                //sprintRemaining = Mathf.Clamp(sprintRemaining += 1 * Time.deltaTime, 0, sprintDuration);
+                sprintRemaining = Mathf.Clamp(sprintRemaining += 1 * Time.deltaTime, 0, sprintDuration);
             }
 
             // Handles sprint cooldown 
             // When sprint remaining == 0 stops sprint ability until hitting cooldown
             if (isSprintCooldown)
             {
-                //sprintCooldown -= 1 * Time.deltaTime;
+                sprintCooldown -= 1 * Time.deltaTime;
                 if (sprintCooldown <= 0)
                 {
                     isSprintCooldown = false;
@@ -339,11 +368,13 @@ public class FPS_Controller_Script : Script
         {
             //HeadBob();
         }
+        startingVO.play(startingVOstr);
     }
     public override void FixedUpdate()
     {
         #region Movement
-        if (playerCanMove)
+        isCollided = gameObject.GetSphereColliderComponent().GetIsInteract();
+        if (playerCanMove && !isCollided)
         {
             // Calculate how fast we should be moving
             Vector3 targetVelocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
@@ -359,21 +390,15 @@ public class FPS_Controller_Script : Script
                 isWalking = false;
             }
 
-            //Vector3 targetVelocityNew = transform.TransformDirection(new Vector3(0, 0, 1));
-            //Console.WriteLine(targetVelocityNew.X + "\t" + targetVelocityNew.Y + "\t" + targetVelocityNew.Z);
-
-
             if (Input.GetKey(Keycode.W) || Input.GetKey(Keycode.S) || Input.GetKey(Keycode.A) || Input.GetKey(Keycode.D))
             {
                 isWalking = true;
-
-                Vector3 transformPosition = transform.GetPosition();
-                targetVelocity = transform.TransformDirection(targetVelocity);
-                transform.SetPosition(new Vector3(transformPosition.X + (targetVelocity.X * walkSpeed), transformPosition.Y, transformPosition.Z + (targetVelocity.Z * walkSpeed)));
+                //audio.play(footStepSoundEffects[0]);
             }
             else
             {
                 isWalking = false;
+                //audio.stop(footStepSoundEffects[0]);
             }
 
             // All movement calculations shile sprint is active
@@ -386,8 +411,8 @@ public class FPS_Controller_Script : Script
 
                 targetVelocity = transform.TransformDirection(targetVelocity) * currentSprintSpeed;
                 // Apply a force that attempts to reach our target velocity
-                Vector3 velocity = rb.GetLinearVelocity();
-                Vector3 velocityChange = targetVelocity - velocity;
+                //Vector3 velocity = rb.GetLinearVelocity();
+                Vector3 velocityChange = targetVelocity /*- velocity*/;
                 velocityChange.X = Mathf.Clamp(velocityChange.X, -maxVelocityChange, maxVelocityChange);
                 velocityChange.Z = Mathf.Clamp(velocityChange.Z, -maxVelocityChange, maxVelocityChange);
                 velocityChange.Y = 0;
@@ -409,7 +434,10 @@ public class FPS_Controller_Script : Script
                     }
                 }
 
-                ////rb.AddForce(velocityChange/*, ForceMode.VelocityChange*/);
+                //rb.AddForce(velocityChange/*, ForceMode.VelocityChange*/);
+
+                Vector3 transformPosition = transform.GetPosition();
+                transform.SetPosition(new Vector3(transformPosition.X + velocityChange.X, transformPosition.Y, transformPosition.Z + velocityChange.Z));
             }
             // All movement calculations while walking
             else
@@ -421,21 +449,65 @@ public class FPS_Controller_Script : Script
                 {
                     //sprintBarCG.alpha -= 3 * Time.deltaTime;
                 }
-
-                //targetVelocity = transform.TransformDirection(targetVelocity).normalise() * walkSpeed;
-                //Console.WriteLine(targetVelocity.X + "\t" + targetVelocity.Y + "\t" + targetVelocity.Z);
-
+                targetVelocity = transform.TransformDirection(targetVelocity) * currentSprintSpeed;
 
                 // Apply a force that attempts to reach our target velocity
                 //Vector3 velocity = rb.GetLinearVelocity();
-                //Vector3 velocityChange = targetVelocity - velocity;
-                //velocityChange.X = Mathf.Clamp(velocityChange.X, -maxVelocityChange, maxVelocityChange);
-                //velocityChange.Z = Mathf.Clamp(velocityChange.Z, -maxVelocityChange, maxVelocityChange);
-                //velocityChange.Y = 0;
+                Vector3 velocityChange = targetVelocity /*- velocity*/;
+                velocityChange.X = Mathf.Clamp(velocityChange.X, -maxVelocityChange, maxVelocityChange);
+                velocityChange.Z = Mathf.Clamp(velocityChange.Z, -maxVelocityChange, maxVelocityChange);
+                velocityChange.Y = 0;
 
                 //rb.AddForce(velocityChange/*, ForceMode.VelocityChange*/);
 
+                Vector3 transformPosition = transform.GetPosition();
+                transform.SetPosition(new Vector3(transformPosition.X + velocityChange.X, transformPosition.Y, transformPosition.Z + velocityChange.Z));
             }
+
+        }
+       
+        if (isCollided)
+        {
+            Vector3 targetVelocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+
+            if (targetVelocity.X != 0 || targetVelocity.Z != 0 && isGrounded)
+            {
+                isWalking = true;
+            }
+            else
+            {
+                isWalking = false;
+            }
+
+            if (Input.GetKey(Keycode.W) || Input.GetKey(Keycode.S) || Input.GetKey(Keycode.A) || Input.GetKey(Keycode.D))
+            {
+                isWalking = true;
+            }
+            else
+            {
+                isWalking = false;
+            }
+            Vector3 velocityChange = targetVelocity /*- velocity*/;
+            velocityChange.X = Mathf.Clamp(velocityChange.X, -maxVelocityChange, maxVelocityChange);
+            velocityChange.Z = Mathf.Clamp(velocityChange.Z, -maxVelocityChange, maxVelocityChange);
+            velocityChange.Y = 0;
+
+            collidedEntity = GameObjectScriptFind(gameObject.GetSphereColliderComponent().GetColliderName());
+
+            Vector3 direction = (gameObject.GetTransformComponent().GetPosition() - collidedEntity.GetTransformComponent().GetPosition()).normalise();
+            float dotProduct = Vector3.Dot(direction, velocityChange);
+            if (dotProduct > 0)
+            {
+                Vector3 transformPosition = transform.GetPosition();
+                transform.SetPosition(new Vector3(transformPosition.X + velocityChange.X, transformPosition.Y, transformPosition.Z + velocityChange.Z));
+                gameObject.GetSphereColliderComponent().SetIsInteract(false);
+                gameObject.GetSphereColliderComponent().SetIsTrigger(false);
+
+            }
+
+            //rb.AddForce(velocityChange/*, ForceMode.VelocityChange*/);
+
+
 
         }
         #endregion

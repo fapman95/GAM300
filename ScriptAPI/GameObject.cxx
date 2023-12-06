@@ -1,4 +1,5 @@
 #include "GameObject.hxx"
+#include "EngineInterface.hxx"
 
 namespace ScriptAPI
 {
@@ -37,6 +38,16 @@ namespace ScriptAPI
 		return UISpriteComponent(entityID);
 	}
 
+	AudioComponent GameObject::GetAudioComponent()
+	{
+		return AudioComponent(entityID);
+	}
+	
+	GraphicComponent GameObject::GetGraphicComponent()
+	{
+		return GraphicComponent(entityID);
+	}
+
 	bool GameObject::activeInHierarchy(TDS::EntityID entityID)
 	{
 		return TDS::ecs.getEntityIsEnabled(entityID);
@@ -60,19 +71,19 @@ namespace ScriptAPI
 
 		if (type == BoxColliderComponent::typeid)
 		{
-			return safe_cast<T>(BoxColliderComponent());
+			return safe_cast<T>(GetBoxColliderComponent());
 		}
 		else if (type == CameraComponent::typeid)
 		{
-			return safe_cast<T>(CameraComponent());
+			return safe_cast<T>(GetCameraComponent());
 		}
 		else if (type == CapsuleColliderComponent::typeid)
 		{
-			return safe_cast<T>(CapsuleColliderComponent());
+			return safe_cast<T>(GetCapsuleColliderComponent());
 		}
 		else if (type == NameTagComponent::typeid)
 		{
-			return safe_cast<T>(NameTagComponent());
+			return safe_cast<T>(GetNameTagComponent());
 		}
 		else if (type == RigidBodyComponent::typeid)
 		{
@@ -90,8 +101,16 @@ namespace ScriptAPI
 		{
 			return safe_cast<T>(GetUISpriteComponent());
 		}
-
-		return T();
+		else if (type == AudioComponent::typeid)
+		{
+			return safe_cast<T>(GetAudioComponent());
+		}
+		else if (type == GraphicComponent::typeid)
+		{
+			return safe_cast<T>(GetGraphicComponent());
+		}
+		Object^ toReturn = EngineInterface::GetScriptByEntityID(entityID, type->FullName);
+		return (T)toReturn;
 	}
 
 	void GameObject::SetEntityID(TDS::EntityID id)

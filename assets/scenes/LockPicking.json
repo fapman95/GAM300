@@ -1,19 +1,24 @@
 {
     "Archetype Sizes": {
-        "1100000000001": {
+        "11000000000010": {
             "0": 272,
             "1": 400,
             "12": 720
         },
-        "1100001000000": {
+        "11000010000000": {
             "0": 272,
             "1": 400,
             "6": 528
+        },
+        "11000000000000": {
+            "0": 136,
+            "1": 200
         }
     },
     "Entity Data": {
         "1": {
-            "ArchetypeID": "1100000000001",
+            "ArchetypeID": "11000000000010",
+            "Enabled": true,
             "Name Tag": {
                 "Name": "OuterLock",
                 "Tag": "",
@@ -75,7 +80,8 @@
             }
         },
         "2": {
-            "ArchetypeID": "1100000000001",
+            "ArchetypeID": "11000000000010",
+            "Enabled": true,
             "Name Tag": {
                 "Name": "InnerLock",
                 "Tag": "",
@@ -98,7 +104,7 @@
                 "Rotation": {
                     "x": 0.0,
                     "y": 0.0,
-                    "z": 0.0
+                    "z": 2.3540984273040522e-7
                 }
             },
             "UI Sprite": {
@@ -137,19 +143,20 @@
             }
         },
         "3": {
-            "ArchetypeID": "1100001000000",
+            "ArchetypeID": "11000010000000",
+            "Enabled": true,
             "Name Tag": {
                 "Name": "LockPick",
                 "Tag": "",
                 "IsActive": true,
-                "HierarchyParent": 0,
-                "HierarchyIndex": 2,
+                "HierarchyParent": 5,
+                "HierarchyIndex": 0,
                 "HierarchyChildren": []
             },
             "Transform": {
                 "Position": {
-                    "x": -0.16337727010250092,
-                    "y": 3.330054759979248,
+                    "x": 0.0,
+                    "y": 3.0,
                     "z": -15.0
                 },
                 "Scale": {
@@ -159,7 +166,7 @@
                 },
                 "Rotation": {
                     "x": 0.0,
-                    "y": -0.0,
+                    "y": 0.0,
                     "z": 0.0
                 }
             },
@@ -180,13 +187,14 @@
             }
         },
         "4": {
-            "ArchetypeID": "1100001000000",
+            "ArchetypeID": "11000010000000",
+            "Enabled": true,
             "Name Tag": {
                 "Name": "New Entity",
                 "Tag": "",
                 "IsActive": true,
                 "HierarchyParent": 0,
-                "HierarchyIndex": 3,
+                "HierarchyIndex": 2,
                 "HierarchyChildren": []
             },
             "Transform": {
@@ -221,18 +229,176 @@
                 },
                 "Used In 2D": false
             }
+        },
+        "5": {
+            "ArchetypeID": "11000000000000",
+            "Enabled": true,
+            "Name Tag": {
+                "Name": "Lock Camera",
+                "Tag": "",
+                "IsActive": true,
+                "HierarchyParent": 0,
+                "HierarchyIndex": 3,
+                "HierarchyChildren": [
+                    3
+                ]
+            },
+            "Transform": {
+                "Position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            }
         }
     },
     "Scripts": {
         "1": {},
         "2": {},
-        "3": {},
-        "4": {}
+        "3": {
+            "LockPick1": {
+                "_TutorialStep": {
+                    "Int": 0
+                },
+                "_TutorialCompleted": {
+                    "Bool": true
+                },
+                "myGameDataManager": {
+                    "GameDataManager": 0
+                },
+                "Door_UI": {
+                    "GameObject": 0
+                },
+                "cam": {
+                    "Component": 0
+                },
+                "playerCam": {
+                    "Component": 0
+                },
+                "innerLock": {
+                    "Component": 2
+                },
+                "pickPosition": {
+                    "Component": 0
+                },
+                "playerController": {
+                    "FPS_Controller_Script": 0
+                },
+                "lockObject": {
+                    "GameObject": 5
+                },
+                "difficultyLvl": {
+                    "String": ""
+                },
+                "maxAngle": {
+                    "Float": 90.0
+                },
+                "lockSpeed": {
+                    "Float": 10.0
+                },
+                "unlocked": {
+                    "Bool": false
+                },
+                "lockSoundEffects": {
+                    "System.String[]": 0
+                },
+                "rattleSoundEffects": {
+                    "System.String[]": 0
+                },
+                "delay": {
+                    "Float": 0.4
+                },
+                "_NumOfTries": {
+                    "GameObject": 0
+                },
+                "lockRange": {
+                    "Float": 10.0
+                },
+                "numOfTries": {
+                    "Int": 5
+                },
+                "percentage": {
+                    "Float": 45.0
+                },
+                "eulerAngle": {
+                    "Float": 0.2991557
+                },
+                "unlockAngle": {
+                    "Float": -67.0
+                },
+                "unlockRange": {
+                    "Vector3": {
+                        "X": -77.0,
+                        "Y": -57.0,
+                        "Z": 0.0
+                    }
+                },
+                "keyPressTime": {
+                    "Float": 0.0
+                },
+                "movePick": {
+                    "Bool": true
+                },
+                "deduct": {
+                    "Bool": true
+                },
+                "displayTutorial": {
+                    "Bool": false
+                },
+                "played": {
+                    "Bool": false
+                },
+                "originalPosition": {
+                    "Vector3": {
+                        "X": 0.0,
+                        "Y": 3.0,
+                        "Z": -15.0
+                    }
+                },
+                "currentRattlePlaying": {
+                    "Int": 0
+                },
+                "timer": {
+                    "Float": 1.2
+                },
+                "passed": {
+                    "Bool": false
+                },
+                "failed": {
+                    "Bool": false
+                },
+                "gameObject": {
+                    "GameObject": 3
+                },
+                "is_Enabled": {
+                    "Bool": true
+                },
+                "is_Awake": {
+                    "Bool": true
+                },
+                "is_Start": {
+                    "Bool": true
+                }
+            }
+        },
+        "4": {},
+        "5": {}
     },
     "Active Archetype": {
         "1": "1100000000001",
         "2": "1100000000001",
         "3": "1100001000000",
-        "4": "1100001000000"
+        "4": "1100001000000",
+        "5": "11000000000000"
     }
 }

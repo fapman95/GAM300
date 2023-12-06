@@ -117,6 +117,8 @@ namespace ScriptAPI
 		static void SetComponent(TDS::EntityID entityId, std::string script, std::string variableName, TDS::EntityID gameObjectEntityID);
 		static void SetScript(TDS::EntityID entityId, std::string script, std::string variableName, TDS::EntityID gameObjectEntityID, std::string scriptReference);
 		
+		static Object^ GetScriptByEntityID(TDS::EntityID entityID, System::String^ scriptName);
+
 		using ScriptList = System::Collections::Generic::Dictionary<String^, Script^>;
 		using NameScriptPair = System::Collections::Generic::KeyValuePair<String^, Script^>;
 		static System::Collections::Generic::SortedList<TDS::EntityID, ScriptList^>^ GetScriptList();
@@ -132,7 +134,8 @@ namespace ScriptAPI
 		static void updateScriptTypeList();
 		static System::Runtime::Loader::AssemblyLoadContext^ loadContext;
 
-		static float fixedUpdateTimer{0.02f};
+		static float fixedUpdateTimer{0.0f};
+		static float mAccumulatedTime{0.0f};
 
 		//static array<FieldInfo^>^ currentFieldArray;
 		//static Object^ currentObject;

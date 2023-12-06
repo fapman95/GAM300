@@ -113,6 +113,11 @@ namespace TDS
 			std::string archetypeID = itr->name.GetString();
 			auto archetypeSizes = itr->value.GetObject();
 
+			while (archetypeID.length() < ecs.getNumberOfComponents())
+			{
+				archetypeID += "0";
+			}
+
 			ecs.addArchetype(archetypeID, false);
 
 			for (rapidjson::Value::ConstMemberIterator componentItr = archetypeSizes.MemberBegin(); componentItr != archetypeSizes.MemberEnd(); ++componentItr)
@@ -145,9 +150,22 @@ namespace TDS
 				std::string componentName = m.name.GetString();
 				if (componentName == "ArchetypeID") // First "componentName" to immediately find the archetype of entity
 				{
-					// Add all components at once
-					ecs.addComponentsByArchetype(currentEntity, m.value.GetString());
+					std::string archetypeID = m.value.GetString();
 
+					// Add all components at once
+					while (archetypeID.length() < ecs.getNumberOfComponents())
+					{
+						archetypeID += "0";
+					}
+
+					ecs.addComponentsByArchetype(currentEntity, archetypeID);
+
+					continue;
+				}
+				if (componentName == "Enabled")
+				{
+					ecs.setEntityIsEnabled(currentEntity, m.value.GetBool());
+					ecs.setEntityPreviouslyEnabled(currentEntity);
 					continue;
 				}
 
@@ -334,6 +352,9 @@ namespace TDS
 
 			writer->Key("ArchetypeID");
 			writer->String(archetype.c_str());
+
+			writer->String("Enabled", static_cast<rapidjson::SizeType>(std::string("Enabled").length()), false);
+			writer->Bool(ecs.getEntityIsEnabled(entityList[i]));
 
 			for (std::string j : ecs.getEntityComponents(entityList[i]))
 			{
@@ -722,6 +743,14 @@ namespace TDS
 	//{
 	//	return allScenes;
 	//}
+
+	/*!*************************************************************************
+	This function is the getter function for the path to assets
+	****************************************************************************/
+	std::string SceneManager::getAssetPath()
+	{
+		return parentFilePath;
+	}
 
 	/*!*************************************************************************
 	This function is the getter function for the path to scenes

@@ -76,6 +76,11 @@ namespace ScriptAPI
 		return TDS::Input::isKeyReleased(keycode);
 	}
 
+	void Input::KeyRelease(uint32_t keycode)
+	{
+		return TDS::Input::KeyRelease(keycode);
+	}
+
 	bool Input::GetMouseButton(uint32_t button)
 	{
 		return TDS::Input::isMouseButtonPressed(button - Keycode::MAX_KEYS);
@@ -100,6 +105,11 @@ namespace ScriptAPI
 		return mousePositionY - TDS::Input::getMousePosition().y;
 	}
 
+	Vector3 Input::GetMousePosition()
+	{
+		return Vector3(TDS::Input::getMousePosition().x, TDS::Input::getMousePosition().y, 0.0f);
+	}
+	
 	float Input::GetLocalMousePosX()
 	{
 		return TDS::Input::getLocalMousePosX();
