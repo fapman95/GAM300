@@ -25,15 +25,12 @@ RTTR_REGISTRATION
 		.property("AngularDamping", &RigidBody::mAngularDamping)
 		.property("MotionType", &RigidBody::mMotionType)
 		.property("UseGravity", &RigidBody::mUseGravity)
-		.property("sensorActivate", &RigidBody::sensorActivated)
-		.property("AABBmin", &RigidBody::AABBmin)
-		.property("AABBmax", &RigidBody::AABBmax);
+		.property("sensorActivate", &RigidBody::sensorActivated);
 
 	rttr::registration::enumeration<RigidBody::MotionType>("MotionType")
 		(
 			rttr::value("STATIC", RigidBody::MotionType::STATIC),
-			rttr::value("DYNAMIC", RigidBody::MotionType::DYNAMIC),
-			rttr::value("KINEMATIC", RigidBody::MotionType::KINEMATIC)
+			rttr::value("DYNAMIC", RigidBody::MotionType::DYNAMIC)
 		);
 }
 
@@ -52,10 +49,8 @@ namespace TDS
 							 mAngularDamping(0.05f),
 							 mBodyID(JoltBodyID()),
 							 mMotionType(MotionType::STATIC),
-							 mUseGravity(true),
-							 sensorActivated(false),
-							 AABBmin(0.f,0.f,0.f),
-							 AABBmax(0.f,0.f,0.f)
+							 mUseGravity(false),
+							 sensorActivated(false)
 	{ }
 
 
@@ -74,9 +69,7 @@ namespace TDS
 														mBodyID(toMove.mBodyID),
 														mMotionType(toMove.mMotionType),
 														mUseGravity(toMove.mUseGravity),
-														sensorActivated(toMove.sensorActivated),
-														AABBmin(toMove.AABBmin),
-														AABBmax(toMove.AABBmax)
+														sensorActivated(toMove.sensorActivated)
 
 	{ }
 
