@@ -30,14 +30,15 @@ namespace ScriptAPI
 
 		Vector3 TransformDirection(Vector3 direction);
 
+		virtual TDS::EntityID GetEntityID();
 		virtual void SetEntityID(TDS::EntityID ID);
+		virtual void SetEnabled(bool enabled);
 
 		GameObject^ gameObject;
 
 	internal:
 		TransformComponent(TDS::EntityID ID);
 		TransformComponent(TDS::EntityID ID, GameObject^ _gameObject);
-		TDS::EntityID GetEntityID();
 
 	private:
 		property Vector3 Position

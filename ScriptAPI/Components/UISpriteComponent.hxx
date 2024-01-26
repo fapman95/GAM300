@@ -34,16 +34,14 @@ namespace ScriptAPI
 
 		void SetFontBackgroundColor(Vector4 color);
 
+		virtual TDS::EntityID GetEntityID();
 		virtual void SetEntityID(TDS::EntityID ID);
+		virtual void SetEnabled(bool enabled);
 
-
-
-		TransformComponent^ transform;
+		TransformComponent transform;
 		
-
 	internal:
 		UISpriteComponent(TDS::EntityID ID);
-		TDS::EntityID GetEntityID();
 
 	private:
 		TDS::EntityID entityID;

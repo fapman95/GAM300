@@ -1,10 +1,21 @@
 #pragma once
 #include "ecs/ecs.h"
-#include "ResourceManagement/ResourceManager.h"
+#include "ResourceManagement/ResourceRef.h"
 namespace TDS
 {
 	class AssetModel;
 	class Texture;
+	class MeshController;
+
+
+
+	typedef enum 
+	{
+		MAIN_ROOT,
+		CHILD_ROOT,
+		CHILD,
+		NOT_CHILD_MESH
+	}MESH_NODE_TYPE;
 
 	class GraphicsComponent : public IComponent
 	{
@@ -26,6 +37,7 @@ namespace TDS
 		inline bool								View2D() { return m_UsedIn2D; }
 		inline TypeReference<AssetModel>& 		GetAsset() { return m_AssetReference; }
 		inline TypeReference<Texture>&			GetTexture() { return m_TextureReference; }
+		inline TypeReference<MeshController>&	GetModel() { return m_MeshControllerRef; }
 		inline bool&							IsPointLight() { return m_Pointlight; }
 		inline int&								GetPointLightID() { return m_PointLightID; }
 		DLL_API inline Vec4						GetColor() { return m_Color; }
@@ -49,10 +61,13 @@ namespace TDS
 	public:
 		TypeReference<AssetModel> 		m_AssetReference;
 		TypeReference<Texture>			m_TextureReference;
+		TypeReference<MeshController>	m_MeshControllerRef;
 		std::string						m_ModelName = "";
 		std::string						m_MeshName = "";
+		std::string						m_MeshNodeName = "";
 		std::string						m_TextureName = "";
 		bool							m_UsedIn2D{ false };
+		
 
 
 	};

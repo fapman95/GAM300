@@ -35,11 +35,11 @@ public class ViewObject : Script
         
         if (isExaming)
         {
-            mainCam.SetActive(mainCamID, false);
-            examineCam.SetActive(examineCamID, true);
+            mainCam.SetActive(false);
+            examineCam.SetActive(true);
             gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = false;
             gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = false;
-            examineUI.SetActive(examineUIID, true);
+            examineUI.SetActive(true);
             //Cursor.visible = true;
             Cursor.LockState = CursorLockMode.None;
 
@@ -146,10 +146,10 @@ public class ViewObject : Script
     {
         for (int x = 0; x < viewableObjTransforms.Length; x++)
         {
-            if(examineObject == viewableObjTransforms[x].gameObject.GetNameTagComponent().GetName())
+            if(examineObject == viewableObjTransforms[x].gameObject.GetComponent<NameTagComponent>().GetName())
             {
                 target = viewableObjTransforms[x];
-                target.gameObject.SetActive(target.gameObject.GetEntityID(), true);
+                target.gameObject.SetActive(true);
                 foundObj = true;
             }
         }
@@ -159,16 +159,16 @@ public class ViewObject : Script
     {
         for (int x = 0; x < _Inventory.noteObjsInInventory.Count; x++)
         {
-            if(_Inventory.noteObjsInInventory[x] == target.gameObject.GetNameTagComponent().GetName())
+            if(_Inventory.noteObjsInInventory[x] == target.gameObject.GetComponent<NameTagComponent>().GetName())
             {
                 gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = true;
                 gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = true;
-                examineCam.SetActive(examineCam.GetEntityID(), false);
-                mainCam.SetActive(mainCam.GetEntityID(), true);
+                examineCam.SetActive(false);
+                mainCam.SetActive(true);
                 isExaming = false;
                 foundObj = false;
-                examineUI.SetActive(examineUI.GetEntityID(), false);
-                target.gameObject.SetActive(target.gameObject.GetEntityID(), false);
+                examineUI.SetActive(false);
+                target.gameObject.SetActive(false);
                 Cursor.LockState = CursorLockMode.Locked;
                 exiting = false;
                 break;
@@ -176,7 +176,7 @@ public class ViewObject : Script
 
             else if(_Inventory.noteObjsInInventory[x] == "")
             {
-                if(target.gameObject.GetNameTagComponent().GetName() == "Reciept")
+                if(target.gameObject.GetComponent<NameTagComponent>().GetName() == "Reciept")
                 {
             //        if (!playedAudio)
             //        {
@@ -213,15 +213,15 @@ public class ViewObject : Script
                 {
                     //subtitles.enabled = false;
                     //added.enabled = true;
-                    _Inventory.noteObjsInInventory[x] = target.gameObject.GetNameTagComponent().GetName();
+                    _Inventory.noteObjsInInventory[x] = target.gameObject.GetComponent<NameTagComponent>().GetName();
                     gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = true;
                     gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = true;
-                    examineCam.SetActive(examineCam.GetEntityID(), false);
-                    mainCam.SetActive(mainCam.GetEntityID(), true);
+                    examineCam.SetActive(false);
+                    mainCam.SetActive(true);
                     isExaming = false;
                     foundObj = false;
-                    examineUI.SetActive(examineUI.GetEntityID(), false);
-                    target.gameObject.SetActive(target.gameObject.GetEntityID(), false);
+                    examineUI.SetActive(false);
+                    target.gameObject.SetActive(false);
                     Cursor.LockState = CursorLockMode.Locked;
                     //this.enabled = false;
                     exiting = false;
@@ -240,16 +240,16 @@ public class ViewObject : Script
     {
         for (int x = 0; x < _Inventory.itemObjsInInventory.Count; x++)
         {
-            if(_Inventory.itemObjsInInventory[x] == target.gameObject.GetNameTagComponent().GetName())
+            if(_Inventory.itemObjsInInventory[x] == target.gameObject.GetComponent<NameTagComponent>().GetName())
             {
                 gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = true;
                 gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = true;
-                examineCam.SetActive(examineCam.GetEntityID(), false);
-                mainCam.SetActive(mainCam.GetEntityID(), true);
+                examineCam.SetActive(false);
+                mainCam.SetActive(true);
                 isExaming = false;
                 foundObj = false;
-                examineUI.SetActive(examineUI.GetEntityID(), false);
-                target.gameObject.SetActive(target.gameObject.GetEntityID(), false);
+                examineUI.SetActive(false);
+                target.gameObject.SetActive(false);
                 Cursor.LockState = CursorLockMode.Locked;
                 exiting = false;
                 break;
@@ -258,15 +258,15 @@ public class ViewObject : Script
             else if (_Inventory.itemObjsInInventory[x] == "")
             {
                 //added.enabled = true;
-                _Inventory.itemObjsInInventory[x] = target.gameObject.GetNameTagComponent().GetName();
+                _Inventory.itemObjsInInventory[x] = target.gameObject.GetComponent<NameTagComponent>().GetName();
                 gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = true;
                 gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = true;
-                examineCam.SetActive(examineCam.GetEntityID(), false);
-                mainCam.SetActive(mainCam.GetEntityID(), true);
+                examineCam.SetActive(false);
+                mainCam.SetActive(true);
                 isExaming = false;
                 foundObj = false;
-                examineUI.SetActive(examineUI.GetEntityID(), false);
-                target.gameObject.SetActive(target.gameObject.GetEntityID(), false);
+                examineUI.SetActive(false);
+                target.gameObject.SetActive(false);
                 Cursor.LockState = CursorLockMode.Locked;
                 //Cursor.visible = false;
                 exiting = false;
@@ -283,16 +283,16 @@ public class ViewObject : Script
     {
         for (int x = 0; x < _Inventory.paintingObjsInInventory.Count; x++)
         {
-            if(_Inventory.paintingObjsInInventory[x] == target.gameObject.GetNameTagComponent().GetName())
+            if(_Inventory.paintingObjsInInventory[x] == target.gameObject.GetComponent<NameTagComponent>().GetName())
             {
                 gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = true;
                 gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = true;
-                examineCam.SetActive(examineCam.GetEntityID(), false);
-                mainCam.SetActive(mainCam.GetEntityID(), true);
+                examineCam.SetActive(false);
+                mainCam.SetActive(true);
                 isExaming = false;
                 foundObj = false;
-                examineUI.SetActive(examineUI.GetEntityID(), false);
-                target.gameObject.SetActive(target.gameObject.GetEntityID(), false);
+                examineUI.SetActive(false);
+                target.gameObject.SetActive(false);
                 //Cursor.visible = false;
                 Cursor.LockState = CursorLockMode.Locked;
                 exiting= false;
@@ -303,15 +303,15 @@ public class ViewObject : Script
             else if (_Inventory.paintingObjsInInventory[x] == "")
             {
                 //added.enabled = true;
-                _Inventory.paintingObjsInInventory[x] = target.gameObject.GetNameTagComponent().GetName();
+                _Inventory.paintingObjsInInventory[x] = target.gameObject.GetComponent<NameTagComponent>().GetName();
                 gameObject.GetComponent<FPS_Controller_Script>().playerCanMove = true;
                 gameObject.GetComponent<FPS_Controller_Script>().cameraCanMove = true;
-                examineCam.SetActive(examineCam.GetEntityID(), false);
-                mainCam.SetActive(mainCam.GetEntityID(), true);
+                examineCam.SetActive(false);
+                mainCam.SetActive(true);
                 isExaming = false;
                 foundObj = false;
-                examineUI.SetActive(examineUI.GetEntityID(), false);
-                target.gameObject.SetActive(target.gameObject.GetEntityID(), false);
+                examineUI.SetActive(false);
+                target.gameObject.SetActive(false);
                 //Cursor.visible = false;
                 Cursor.LockState = CursorLockMode.Locked;
                 exiting = false;

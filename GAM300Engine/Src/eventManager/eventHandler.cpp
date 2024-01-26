@@ -15,22 +15,34 @@ namespace TDS
 		for (auto event : theQueue)
 		{
 			NameTag* nameTagComponent = ecs.getComponent<NameTag>(event->id);
-		
+			Transform* parentComp = ecs.getComponent<Transform>(event->id);
 			std::shared_ptr<ChildTransformationEvent> currentEvent = static_pointer_cast<ChildTransformationEvent>(event);
 			
+
 			for (auto childID : nameTagComponent->GetHierarchyChildren())
 			{
 				changeChildTransformation(childID, currentEvent->positionChange, currentEvent->scaleChange, currentEvent->rotationChange);
 			}
+			
+
 		}
 		eventManager.clearQueue(EventTypes::CHILD_TRANSFORMATION);
 	}
-	void EventHandler::changeChildTransformation(EntityID childEntity, Vec3& positionChange, Vec3& scaleChange, Vec3& rotationChange)
+	void EventHandler::changeChildTransformation(EntityID childEntity,  Vec3& positionChange,  Vec3& scaleChange,  Vec3& rotationChange)
 	{
 		Transform* childTransform = GetTransform(childEntity);
-		childTransform->SetPosition(childTransform->GetPosition() + positionChange);
-		childTransform->SetScale(childTransform->GetScale() + scaleChange);
-		childTransform->SetRotation(childTransform->GetRotation() + rotationChange);
+
+		Vec3 newPosition = childTransform->GetPosition();
+		Vec3 newScale = childTransform->GetScale();
+		Vec3 newRotation = childTransform->GetRotation();
+
+		newPosition += positionChange;
+		newScale += scaleChange;
+		newRotation += rotationChange;
+
+		childTransform->SetPosition(newPosition);
+		childTransform->SetScale(newScale);
+		childTransform->SetRotation(newRotation);
 
 		NameTag* childNameTag = GetNameTag(childEntity);
 
@@ -38,6 +50,35 @@ namespace TDS
 		{
 			changeChildTransformation(childID, positionChange, scaleChange, rotationChange);
 		}
+	}
+	void EventHandler::TransformChildSubMesh(EntityID childEntity, EntityID parentEntity, Vec3& positionChange, Vec3& scaleChange, Vec3& rotationChange, Mat4& parentTransform)
+	{
+		//Transform* childTransform = GetTransform(childEntity);
+
+		//Vec3 newPosition = childTransform->getLocalPosition(parentEntity);
+		//Vec3 newScale = childTransform->getLocalPosition(parentEntity);
+		//Vec3 newRotation = childTransform->getLocalPosition(parentEntity);
+
+		//newPosition += positionChange;
+		//newScale += scaleChange;
+		//newRotation += rotationChange;
+		//
+		////Convert to global position
+		//newPosition = parentTransform * newPosition;
+		//newScale = parentTransform * newScale;
+		//newRotation = parentTransform * newRotation;
+
+		//childTransform->SetPosition(newPosition);
+		//childTransform->SetRotation(newRotation);
+		//childTransform->SetScale(newScale);
+
+		//Mat4::Translate()
+		//NameTag* childNameTag = GetNameTag(childEntity);
+
+		//for (auto childID : childNameTag->GetHierarchyChildren())
+		//{
+		//	TransformChildSubMesh(childID, parentEntity, positionChange, scaleChange, rotationChange, parentTransform);
+		//}
 	}
 	void EventHandler::postChildTransformationEvent(EntityID entityID, Vec3 oldPosition, Vec3 oldScale, Vec3 oldRotation)
 	{

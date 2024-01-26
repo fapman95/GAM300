@@ -17,13 +17,14 @@ namespace ScriptAPI
 		bool GetIsActive();
 		void SetIsActive(bool value);
 
+		virtual TDS::EntityID GetEntityID();
 		virtual void SetEntityID(TDS::EntityID ID);
+		virtual void SetEnabled(bool enabled);
 
 		TransformComponent transform;
 
 	internal:
 		NameTagComponent(TDS::EntityID ID);
-		TDS::EntityID GetEntityID();
 
 	private:
 		property System::String^ Name

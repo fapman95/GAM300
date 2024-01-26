@@ -63,11 +63,11 @@ public class Painting_Script : Script
             {
                 if (!receiptFound)
                 {
-                    Audio.play(voClip[0]);
+                    //Audio.play(voClip[0]);
                 }
                 else
                 {
-                    Audio.play(voClip[1]);
+                    //Audio.play(voClip[1]);
                 }
             }
             else
@@ -77,7 +77,7 @@ public class Painting_Script : Script
 
             if (Input.GetKeyDown(Keycode.E) && !paintingTaken && paintingParent.GetEntityID() != 0)
             {
-                paintingParent.SetActive(paintingParent.GetEntityID(), false);
+                paintingParent.SetActive(false);
                 paintingTaken = true;
             }
         }

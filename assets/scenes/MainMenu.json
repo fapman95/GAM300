@@ -1,15 +1,15 @@
 {
     "Archetype Sizes": {
-        "11000010000010": {
-            "0": 672,
+        "110000100000100": {
+            "0": 816,
             "1": 1200,
-            "6": 1344,
-            "12": 1920
+            "6": 1584,
+            "12": 2160
         }
     },
     "Entity Data": {
         "1": {
-            "ArchetypeID": "11000010000010",
+            "ArchetypeID": "110000100000100",
             "Enabled": true,
             "Name Tag": {
                 "Name": "BackGround",
@@ -87,7 +87,7 @@
             }
         },
         "2": {
-            "ArchetypeID": "11000010000010",
+            "ArchetypeID": "110000100000100",
             "Enabled": true,
             "Name Tag": {
                 "Name": "PlayButton",
@@ -165,7 +165,7 @@
             }
         },
         "3": {
-            "ArchetypeID": "11000010000010",
+            "ArchetypeID": "110000100000100",
             "Enabled": true,
             "Name Tag": {
                 "Name": "SettingsButton",
@@ -243,7 +243,7 @@
             }
         },
         "4": {
-            "ArchetypeID": "11000010000010",
+            "ArchetypeID": "110000100000100",
             "Enabled": true,
             "Name Tag": {
                 "Name": "QuitButton",
@@ -321,7 +321,7 @@
             }
         },
         "5": {
-            "ArchetypeID": "11000010000010",
+            "ArchetypeID": "110000100000100",
             "Enabled": true,
             "Name Tag": {
                 "Name": "TeamLogo",
@@ -399,7 +399,7 @@
             }
         },
         "6": {
-            "ArchetypeID": "11000010000010",
+            "ArchetypeID": "110000100000100",
             "Enabled": true,
             "Name Tag": {
                 "Name": "Title",
@@ -482,22 +482,13 @@
         "2": {
             "PlayButton": {
                 "bgm": {
-                    "Component": 2
+                    "ScriptAPI.AudioComponent": 2
                 },
                 "bgmName": {
-                    "String": "skyclad_sound_ambience_dark_loop_dynamic_tones_howling_moaning_mournful_eerie_105"
+                    "System.String": "skyclad_sound_ambience_dark_loop_dynamic_tones_howling_moaning_mournful_eerie_105"
                 },
                 "gameObject": {
-                    "GameObject": 2
-                },
-                "is_Enabled": {
-                    "Bool": true
-                },
-                "is_Awake": {
-                    "Bool": true
-                },
-                "is_Start": {
-                    "Bool": true
+                    "ScriptAPI.GameObject": 2
                 }
             }
         },

@@ -26,6 +26,7 @@
 #include "UiSprite.h"
 #include "fmod_engine/AudioEngine.h"
 #include "SoundInfo.h"
+#include "ParticleComponent.h"
 
 // Helper functions for components
 namespace TDS
@@ -40,13 +41,20 @@ namespace TDS
 	DLL_API struct ScriptValues
 	{
 		std::string name;
-		std::string value;
 		std::string type;
+
+		std::string value;
+
+		// For game objects and components
 		EntityID referenceEntityID = 0;
 
+		// For vector info
 		float vectorValueX;
 		float vectorValueY;
 		float vectorValueZ;
+		float vectorValueW;
+
+		// Header
 		std::string headerString;
 	};
 

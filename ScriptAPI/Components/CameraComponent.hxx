@@ -35,13 +35,14 @@ namespace ScriptAPI
 		Vector3 getForwardVector();
 		void setForwardVector(float angle);
 
+		virtual TDS::EntityID GetEntityID();
 		virtual void SetEntityID(TDS::EntityID ID);
+		virtual void SetEnabled(bool enabled);
 
 		TransformComponent transform;
 
 	internal:
 		CameraComponent(TDS::EntityID ID);
-		TDS::EntityID GetEntityID();
 
 	private:
 		property Vector3 CameraOffset

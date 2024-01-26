@@ -1,5 +1,7 @@
 #include "SphereColliderComponent.hxx"
 #include "../TypeConversion.hxx"
+#include "../EngineInterface.hxx"
+
 namespace ScriptAPI
 {
 	// ISTRIGGER =============================================================================
@@ -128,12 +130,15 @@ namespace ScriptAPI
 
 	// CONSTRUCTOR ===========================================================================
 	SphereColliderComponent::SphereColliderComponent(TDS::EntityID ID) : entityID(ID), transform(TransformComponent(ID))
-	{ }
+	{
+		gameObject = EngineInterface::GetGameObject(ID);
+	}
 
 	void SphereColliderComponent::SetEntityID(TDS::EntityID ID)
 	{
 		entityID = ID;
 		transform = TransformComponent(ID);
+		gameObject = EngineInterface::GetGameObject(ID);
 	}
 
 	TDS::EntityID SphereColliderComponent::GetEntityID()
@@ -141,4 +146,8 @@ namespace ScriptAPI
 		return entityID;
 	}
 
+	void SphereColliderComponent::SetEnabled(bool enabled)
+	{
+		TDS::ecs.setEntityIsEnabled(GetEntityID(), enabled);
+	}
 }

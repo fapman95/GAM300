@@ -241,6 +241,8 @@ namespace TDS
 		static float getLocalMousePosX();
 		static float getLocalMousePosY();
 
+		static void centerandhidemouse(HWND hwnd);
+
 	private:
 		static bool exit_cursor;
 		static Vec2 local_MousePos;

@@ -10,7 +10,6 @@
 
 namespace ScriptAPI
 {
-
 	/*enum class Keycode : uint32_t
 	{
 		A = TDS_A,
@@ -144,33 +143,47 @@ namespace ScriptAPI
 		static uint32_t SLASH = TDS_SLASH;
 		static uint32_t SEMICOLON = TDS_SEMICOLON;
 
-        static uint32_t MAX_KEYS = TDS_MAX_KEYS;
+		static uint32_t MAX_KEYS = TDS_MAX_KEYS;
 
-        static uint32_t M1 = TDS_MOUSE_LEFT + MAX_KEYS;
-        static uint32_t M2 = TDS_MOUSE_RIGHT + MAX_KEYS;
-        static uint32_t MIDDLE = TDS_MOUSE_MIDDLE + MAX_KEYS;
-        static uint32_t M4 = TDS_MOUSE_X1 + MAX_KEYS;
-        static uint32_t M5 = TDS_MOUSE_X2 + MAX_KEYS;
-        static uint32_t SCROLL = TDS_MOUSE_SCROLL + MAX_KEYS;
+		static uint32_t M1 = TDS_MOUSE_LEFT + MAX_KEYS;
+		static uint32_t M2 = TDS_MOUSE_RIGHT + MAX_KEYS;
+		static uint32_t MIDDLE = TDS_MOUSE_MIDDLE + MAX_KEYS;
+		static uint32_t M4 = TDS_MOUSE_X1 + MAX_KEYS;
+		static uint32_t M5 = TDS_MOUSE_X2 + MAX_KEYS;
+		static uint32_t SCROLL = TDS_MOUSE_SCROLL + MAX_KEYS;
 	};
 
-    public ref class Input
-    {
-    public:
-        static void InputSetup();
-        static float GetAxisRaw(System::String^ code);
-        static float GetAxis(System::String^ code);
-        static bool GetKey(uint32_t keycode);
-        static bool GetKeyDown(uint32_t keycode);
-        static bool GetKeyUp(uint32_t keycode);
-        static bool GetMouseButton(uint32_t button);
-        static bool GetMouseButtonUp(uint32_t button);
-        static bool GetMouseButtonDown(uint32_t button);
+	public ref class Input
+	{
+	public:
+		static void InputSetup();
+		static float GetAxisRaw(System::String^ code);
+		static float GetAxis(System::String^ code);
+		static bool GetKey(uint32_t keycode);
+		static bool GetKeyDown(uint32_t keycode);
+		static bool GetKeyUp(uint32_t keycode);
+		static bool GetMouseButton(uint32_t button);
+		static bool GetMouseButtonUp(uint32_t button);
+		static bool GetMouseButtonDown(uint32_t button);
 		static float GetLocalMousePosX();
 		static float GetLocalMousePoxY();
 		static float GetMousePositionDifferenceX();
 		static float GetMousePositionDifferenceY();
 		static void KeyRelease(uint32_t keycode);
+
+		//new functions by amadeus for testing
+		static void HideMouse();
+		static void SetMousePosX(uint32_t Xpos);
+		static void SetMousePosY(uint32_t Ypos);
+		static void CenterMouseX();
+		static void CenterMouseY();
+		static void UpdateLastMousePos(int windowX, int windowY);
+		static int GetScreenMouseX();
+		static int GetScreenMouseY();
+		static void CenterLastMousePos();
+		static int ScreenMousePosdX();
+		static int ScreenMousePosdY();
+
 
 		//static float Get2DMousePosX();
 		//static float Get2DMousePosY();
@@ -182,5 +195,10 @@ namespace ScriptAPI
 		static System::Collections::Generic::Dictionary<System::String^, System::Tuple<uint32_t, uint32_t>^>^ AxisDictionary;
 		static float mousePositionX;
 		static float mousePositionY;
+		static int WinPosX;
+		static int WinPosY;
+
+		static int LastMousePosX;
+		static int LastMousePosY;
 	};
 }

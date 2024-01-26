@@ -2,7 +2,7 @@
 #include "components/GraphicsComponent.h"
 
 namespace ScriptAPI {
-	GraphicComponent::GraphicComponent(TDS::EntityID ID) : entityID(ID) {}
+	GraphicComponent::GraphicComponent(TDS::EntityID ID) : entityID(ID), transform(TransformComponent(ID)) {}
 	
 	float GraphicComponent::getColourAlpha() 
 	{
@@ -31,6 +31,11 @@ namespace ScriptAPI {
 	void GraphicComponent::SetEntityID(TDS::EntityID ID) 
 	{
 		entityID = ID;
+	}
+
+	void GraphicComponent::SetEnabled(bool enabled)
+	{
+		TDS::ecs.setEntityIsEnabled(GetEntityID(), enabled);
 	}
 
 	Vector4 GraphicComponent::Color::get() 

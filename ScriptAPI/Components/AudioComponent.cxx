@@ -183,6 +183,11 @@ namespace ScriptAPI
 		entityID = id;
 	}
 
+	void AudioComponent::SetEnabled(bool enabled)
+	{
+		TDS::ecs.setEntityIsEnabled(GetEntityID(), enabled);
+	}
+
 	//unique ID
 	unsigned int AudioComponent::uniqueID::get()
 	{
@@ -277,17 +282,5 @@ namespace ScriptAPI
 	void AudioComponent::ReverbAmount::set(float value)
 	{
 		TDS::GetSoundInfo(entityID)->setReverbAmount(value);
-	}
-
-
-	// Audio class
-	void Audio::play(System::String^ pathing)
-	{
-		TDS::proxy_audio_system::ScriptPlay(toStdString(pathing));
-	}
-
-	void Audio::stop(System::String^ pathing)
-	{
-		TDS::proxy_audio_system::ScriptStop(toStdString(pathing));
 	}
 }

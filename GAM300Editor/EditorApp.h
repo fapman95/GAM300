@@ -19,6 +19,7 @@
 #include "dotnet/ImportExport.h"
 #include "dotnet/include/coreclrhost.h" 
 #include "Rendering/Skybox.h"
+
 namespace TDS
 {
 	class Application
@@ -144,7 +145,7 @@ namespace TDS
 		coreclr_shutdown_ptr        shutdownCoreClr = nullptr;
 
 
-	};//class application
+};//class application
 
 
 

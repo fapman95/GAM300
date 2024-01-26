@@ -1,4 +1,7 @@
 #include "Input.hxx"
+#include "Rendering/GraphicsManagerWrapperCalls.h"
+#include "Windows.h"
+
 using namespace System;
 using namespace System::Runtime::InteropServices;
 
@@ -32,18 +35,19 @@ namespace ScriptAPI
 		float AxisValue = 0.0f;
 		float minValue = -1.0f;
 		float maxValue = 1.0f;
-		
+		//std::cout << mousePositionX << "\n";
 		if (AxisDictionary[code]->Item1 >= TDS_MAX_KEYS)
 		{
 			if (code == "Mouse X") // X (may want to change)
 			{
 				float getMouseDifferenceX = GetMousePositionDifferenceX();
-				AxisValue += getMouseDifferenceX / (1280 / 4);
+				//std::cout << GetMousePositionDifferenceX()<<"\n";
+				AxisValue += getMouseDifferenceX * 0.01;
 			}
 			else if (code == "Mouse Y")// Y (may want to change)
 			{
 				float getMouseDifferenceY = GetMousePositionDifferenceY();
-				AxisValue -= getMouseDifferenceY / (720 / 4);
+				AxisValue -= getMouseDifferenceY * 0.01;
 			}
 		}
 		else
@@ -109,7 +113,7 @@ namespace ScriptAPI
 	{
 		return Vector3(TDS::Input::getMousePosition().x, TDS::Input::getMousePosition().y, 0.0f);
 	}
-	
+
 	float Input::GetLocalMousePosX()
 	{
 		return TDS::Input::getLocalMousePosX();
@@ -124,5 +128,113 @@ namespace ScriptAPI
 	{
 		mousePositionX = TDS::Input::getMousePosition().x;
 		mousePositionY = TDS::Input::getMousePosition().y;
+		int width = TDS::GetScreenWidth();
+		int height = TDS::GetScreenHeight();
+		if (mousePositionX > 0.75f*width || mousePositionX < 0.25f*width) {
+			CenterMouseX();
+		}
+		if (mousePositionY > 0.9f * height || mousePositionY < 0.1f * height)
+		{
+			CenterMouseY();
+		}
+		//std::cout << mousePositionX << std::endl;
+	}
+
+	void Input::HideMouse() {
+		ShowCursor(FALSE);
+	}
+
+	void Input::SetMousePosX(uint32_t Xpos) {
+		mousePositionX = Xpos;
+	}
+
+	void Input::SetMousePosY(uint32_t Ypos) {
+		mousePositionY = Ypos;
+	}
+
+	void Input::CenterMouseX() {
+		POINT currentMousePos;
+		GetCursorPos(&currentMousePos);
+
+		int width = TDS::GetScreenWidth();
+
+		//get top left of window
+		int windowX = TDS::GraphicsManagerWrapperCalls::GetWinPosX();
+
+		int centerX = windowX + (width / 2);
+
+		//std::cout << mousePositionX << "\n";
+		//std::cout << centerX<<"\n";
+		SetCursorPos(centerX, currentMousePos.y);
+		//mousePositionX = TDS::Input::getMousePosition().x;
+		mousePositionX = width / 2;
+		//std::cout << currentMousePos.x << "\n" << mousePositionX << "\n";
+		//LastMousePosY = height/2;
+	}
+
+	void Input::CenterMouseY() {
+		POINT currentMousePos;
+		GetCursorPos(&currentMousePos);
+
+		int height = TDS::GetScreenHeight();
+
+		//get top left of window
+		int windowY = TDS::GraphicsManagerWrapperCalls::GetWinPosY();
+
+		int centerY = windowY + (height / 2);
+
+		//std::cout << mousePositionX << "\n";
+		//std::cout << centerX<<"\n";
+		SetCursorPos(currentMousePos.x, centerY);
+		mousePositionY = height / 2;
+		//mousePositionY = TDS::Input::getMousePosition().y;
+		//mousePositionY = height / 2;
+
+		//LastMousePosY = height/2;*/
+
+	}
+
+	void Input::UpdateLastMousePos(int winX, int winY) {
+		//std::cout << LastMousePosX<<"last X\n";
+		LastMousePosX = winX;
+		LastMousePosY = winY;
+		//std::cout << LastMousePosX<<"updated X\n";
+	}
+
+	int Input::GetScreenMouseX() {
+		POINT cursorPos;
+		GetCursorPos(&cursorPos);
+		return cursorPos.x;
+	}
+
+	int Input::GetScreenMouseY() {
+		POINT cursorPos;
+		GetCursorPos(&cursorPos);
+		return cursorPos.y;
+	}
+
+	void Input::CenterLastMousePos() {
+		int width = TDS::GetScreenWidth();
+		int height = TDS::GetScreenHeight();
+
+		//get top left of window
+		int windowX = TDS::GraphicsManagerWrapperCalls::GetWinPosX();
+		int windowY = TDS::GraphicsManagerWrapperCalls::GetWinPosY();
+
+		LastMousePosX = windowX + (width / 2);
+		LastMousePosY = windowY + (height / 2);
+
+	}
+
+	int Input::ScreenMousePosdX() {
+		POINT cursorPos;
+		GetCursorPos(&cursorPos);
+		return (GetScreenMouseX() - LastMousePosX);
+	}
+
+	int Input::ScreenMousePosdY() {
+		POINT cursorPos;
+		GetCursorPos(&cursorPos);
+		return GetScreenMouseY() - cursorPos.y;
 	}
 }
